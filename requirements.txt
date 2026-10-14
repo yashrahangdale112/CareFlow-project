@@ -1,0 +1,14 @@
+# CareFlow: Clinical Pathway Process Mining
+# Core dependencies (light weight - install this first)
+pandas>=2.0.0
+numpy>=1.24.0
+pyyaml>=6.0
+matplotlib>=3.7.0
+networkx>=3.1
+scikit-learn>=1.3.0
+plotly>=5.18.0
+streamlit>=1.32.0
+openpyxl>=3.1.0
+reportlab>=4.0.0
+
+# Optional (heavier) - see requirements-optional.txt
