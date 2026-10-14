@@ -1,0 +1,16 @@
+activity,events,avg_service_min,avg_wait_min,total_cost_inr
+Lab Test,1677,49.75,80.64,2507678.02
+Discharge,1500,20.03,43.71,451005.29
+Registration,1500,11.78,0.0,265610.56
+Medication Prescribed,1125,25.02,44.02,563719.67
+Triage,1100,14.58,24.97,719918.52
+Diagnosis Confirmed,1100,14.72,59.98,649547.36
+Discharge Planning,979,35.22,69.7,1207277.28
+Specialist Consultation,921,30.46,36.95,1122295.35
+Physiotherapy,856,48.73,105.03,1247524.55
+Radiology,678,44.7,134.5,1669560.1
+Emergency Assessment,579,35.33,35.59,918285.29
+Observation,579,153.65,226.61,3121822.62
+Surgery,386,202.92,127.84,9381243.14
+Admission,375,40.58,44.06,533197.56
+ICU Transfer,228,70.54,105.56,1528075.23

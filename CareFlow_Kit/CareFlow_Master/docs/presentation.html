@@ -1,0 +1,239 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="cover">
+  <div class="badge">DELIVERABLE 4</div>
+  <h1>Presentation Content</h1>
+  <div class="sub">CareFlow — Clinical Pathway Process Mining</div>
+  <div class="meta">
+    13 slides · copy-paste ready for PowerPoint<br>
+    <b>Presenter:</b> Yash Rahangdale · <b>Ref. No.:</b> ITS/DA/1393<br>
+    <b>Date:</b> 10 October 2026
+  </div>
+</div>
+
+<div class="box">
+<b>Kaise use karein:</b> PowerPoint kholiye → New Presentation → har slide ke liye
+<b>Insert → New Slide (Title and Content)</b> → neeche diya Title aur Bullets copy-paste kar dijiye.
+Charts ke liye <code>outputs/figures/</code> folder se PNG drag-drop kar dijiye (slide ke saath
+figure ka naam likha hai). Total time: 10–12 minute.
+</div>
+
+<h2>SLIDE 1 — Title slide</h2>
+<table class="kv">
+<tr><td>Title</td><td>CareFlow: Clinical Pathway Process Mining</td></tr>
+<tr><td>Subtitle</td><td>Discovering, Analysing and Predicting Hospital Patient Pathways from Event Logs</td></tr>
+<tr><td>Presenter line</td><td>Yash Rahangdale · Data Associate L1 Intern · Data Analytics Domain</td></tr>
+<tr><td>Footer line</td><td>Infotact Solutions · Ref. No. ITS/DA/1393 · 10 October 2026</td></tr>
+<tr><td>Figure</td><td>koi nahi (clean title slide)</td></tr>
+</table>
+
+<h2>SLIDE 2 — Agenda</h2>
+<table class="kv">
+<tr><td>Title</td><td>Agenda</td></tr>
+<tr><td>Bullets</td><td>
+1. Problem: why clinical pathways drift<br>
+2. What is process mining and why healthcare needs it<br>
+3. Data: 1,500 patient journeys, 13,583 events<br>
+4. Discovered process model and pathway variants<br>
+5. Performance analysis: bottlenecks, cost, resources, load<br>
+6. Conformance checking<br>
+7. Predictive model: who will become a long stay?<br>
+8. Dashboard demonstration<br>
+9. Business recommendations, limitations and next steps
+</td></tr>
+</table>
+
+<h2>SLIDE 3 — Problem statement</h2>
+<table class="kv">
+<tr><td>Title</td><td>The Problem: pathways are designed one way, executed another</td></tr>
+<tr><td>Bullets</td><td>
+• A patient journey runs Registration → Triage → Tests → Diagnosis → Treatment → Discharge<br>
+• In reality every journey differs: repeated tests, ICU escalation, delayed discharge<br>
+• Traditional dashboards show <i>aggregates</i> — bed occupancy, average stay, monthly cost<br>
+• Aggregates reveal <b>that</b> something is slow, never <b>where inside the process</b><br>
+• Result: waiting time and cost accumulate invisibly, and nobody owns the bottleneck
+</td></tr>
+</table>
+<div class="warn"><b>Bolne ke liye:</b> “Ek line me problem — hospital ko pata hota hai ki patient
+zyada der ruk raha hai, lekin yeh nahi pata ki process ke andar exactly kahan ruk raha hai.”</div>
+
+<h2>SLIDE 4 — What is process mining</h2>
+<table class="kv">
+<tr><td>Title</td><td>Solution Approach: Process Mining on the Event Log</td></tr>
+<tr><td>Bullets</td><td>
+• An <b>event log</b> records every activity: case_id + activity + timestamp<br>
+• <b>Discovery</b> — derive the real process model from data, no interviews needed<br>
+• <b>Conformance</b> — measure how far reality deviates from the expected pathway<br>
+• <b>Enhancement / prediction</b> — quantify bottlenecks and forecast outcomes<br>
+• Implemented in Python with pandas, networkx, scikit-learn, Streamlit; pm4py adds the official miner algorithms
+</td></tr>
+</table>
+
+<h2>SLIDE 5 — Data</h2>
+<table class="kv">
+<tr><td>Title</td><td>Dataset: 6 months of hospital activity</td></tr>
+<tr><td>Bullets</td><td>
+• 1,500 patient cases · 13,664 raw events → 13,583 after cleaning<br>
+• 15 clinical activities · 28 resources · 10 departments<br>
+• Window: 01 Mar 2026 → 31 Aug 2026<br>
+• Required columns: case_id, activity, timestamp (+ optional resource, cost, durations)<br>
+• Cleaning: 81 duplicate events removed, 203 blank resource fields filled<br>
+• Four clinical pathway templates: Outpatient 35 %, Emergency Surgical 25 %, Chronic Follow-up 25 %, ICU Escalation 15 %
+</td></tr>
+<tr><td>Figure</td><td><code>case_volume_trend.png</code></td></tr>
+</table>
+<div class="warn"><b>Honesty point (ise zaroor bolein):</b> “Dataset synthetic hai — assignment ki
+confidentiality constraint aur 1-month window ke kaaran. Generator realistic distributions,
+rework loops aur data-quality defects inject karta hai, aur poori pipeline seed = 42 par
+reproducible hai.”</div>
+
+<h2>SLIDE 6 — Methodology / pipeline</h2>
+<table class="kv">
+<tr><td>Title</td><td>Methodology: a seven-stage pipeline</td></tr>
+<tr><td>Bullets</td><td>
+1. Event-log generation / import<br>
+2. Cleaning + feature engineering (9 engineered features)<br>
+3. Process discovery — Directly-Follows Graph + variant ranking<br>
+4. Performance analytics — LOS, bottleneck, cost, resources, temporal load<br>
+5. Conformance checking — token-based replay<br>
+6. Predictive modelling — three algorithms, two feature sets<br>
+7. Interactive Streamlit dashboard — 5 tabs, 4 live filters<br>
+• Runtime: ~17 seconds end-to-end · fully reproducible
+</td></tr>
+</table>
+
+<h2>SLIDE 7 — Discovered process model</h2>
+<table class="kv">
+<tr><td>Title</td><td>Discovered Care Pathway</td></tr>
+<tr><td>Bullets</td><td>
+• 28 directly-follows edges across 15 activities<br>
+• All 1,500 cases start at Registration and end at Discharge — a well-formed log<br>
+• 14 distinct pathway variants<br>
+• Top variant = 29.87 % of cases · Top 5 variants = 80.94 %<br>
+• Interpretation: variation is <b>concentrated</b> — standardising five variants covers most of the process
+</td></tr>
+<tr><td>Figure</td><td><code>dfg_careflow.png</code> (full slide bhar ke dikhaiye)</td></tr>
+</table>
+
+<h2>SLIDE 8 — Variants</h2>
+<table class="kv">
+<tr><td>Title</td><td>Pathway Variants: where patients actually go</td></tr>
+<tr><td>Bullets</td><td>
+• 14 unique activity sequences across 1,500 journeys<br>
+• Top 5 variants explain 80.94 % of all cases<br>
+• Remaining 9 variants are exceptional journeys (ICU escalation, complex surgical cases)<br>
+• Every additional variant means extra coordination, extra training and extra cost
+</td></tr>
+<tr><td>Figure</td><td><code>variants_top10.png</code></td></tr>
+</table>
+
+<h2>SLIDE 9 — Performance analytics</h2>
+<table class="kv">
+<tr><td>Title</td><td>Performance Analysis: the numbers that matter</td></tr>
+<tr><td>Bullets</td><td>
+• Average length of stay <b>9.65 h</b> (median 6.14 h, P90 18.69 h) — right-skewed<br>
+• Long-stay cases (&gt; 24 h): <b>17 (1.13 %)</b><br>
+• Biggest bottleneck: <b>Observation — 226.61 min average wait</b><br>
+• Total waiting time across all cases: <b>868,869.6 minutes</b> of lost capacity<br>
+• Total treatment cost <b>INR 2,58,86,760</b> · average <b>INR 17,258</b> per case<br>
+• Costliest department: <b>Operation Theatre</b><br>
+• Busiest resource: <b>REC-01</b> with 1,038 events<br>
+• Peak load: <b>Friday ≈ 14:00</b>
+</td></tr>
+<tr><td>Figures</td><td><code>bottleneck_waiting.png</code> + <code>kpi_los_distribution.png</code></td></tr>
+</table>
+
+<h2>SLIDE 10 — Pathway comparison</h2>
+<table class="kv">
+<tr><td>Title</td><td>Cost follows the pathway, not the volume</td></tr>
+<tr><td>Bullets</td><td>
+• P1 Outpatient — 521 cases · 4.52 h · INR 5,150<br>
+• P3 Chronic Follow-up — 400 cases · 5.77 h · INR 7,170<br>
+• P4 ICU Escalation — 204 cases · 15.15 h · INR 22,282<br>
+• P2 Emergency Surgical — 375 cases · 17.94 h · INR 42,107<br>
+• Emergency Surgical costs <b>8.2×</b> Outpatient per patient on fewer patients<br>
+• Implication: staffing and budgeting must be pathway-aware
+</td></tr>
+<tr><td>Figure</td><td><code>pathway_comparison.png</code></td></tr>
+</table>
+
+<h2>SLIDE 11 — Conformance and prediction</h2>
+<table class="kv">
+<tr><td>Title</td><td>Conformance Checking and Long-Stay Prediction</td></tr>
+<tr><td>Bullets</td><td>
+<b>Conformance (token-based replay):</b><br>
+• Model = 28 DFG edges (occurrence ≥ 3)<br>
+• Average fitness 1.0000 · 100 % cases conforming<br>
+• <i>Explanation:</i> synthetic data is generated from fixed templates, so the model can replay its own data perfectly; on a real hospital log expect <b>0.70–0.95</b><br><br>
+<b>Prediction:</b><br>
+• Target: length of stay &gt; 24 hours (1.13 % positive rate)<br>
+• Three algorithms × two feature sets (full 19 vs leakage-free 14)<br>
+• Production model: <b>Gradient Boosting</b> — accuracy 0.997 · precision 1.000 · recall 0.667 · F1 0.800 · ROC-AUC 0.998<br>
+• Zero false alarms on the test set<br>
+• Top drivers: number of events, unique activities, ICU transfer, rework count
+</td></tr>
+<tr><td>Figures</td><td><code>conformance_fitness.png</code> + <code>model_roc.png</code></td></tr>
+</table>
+
+<h2>SLIDE 12 — Dashboard demonstration</h2>
+<table class="kv">
+<tr><td>Title</td><td>Interactive Dashboard (live demonstration)</td></tr>
+<tr><td>Bullets</td><td>
+• Built with Streamlit + Plotly — runs with <code>streamlit run dashboard/app.py</code><br>
+• 4 live sidebar filters: care pathway, department, length of stay, triage level<br>
+• 5 KPI cards: cases, events, average LOS, average cost per case, average fitness<br>
+• 5 tabs: Overview · Process Discovery · Conformance · ML Model · Data<br>
+• 12+ interactive charts including LOS histogram, bottleneck ranking, cost treemap, DFG, ROC curve, confusion matrix, feature importance<br>
+• Filtered data downloadable as CSV directly from the dashboard
+</td></tr>
+<tr><td>Figures</td><td>Dashboard ke apne screenshots (Overview, Discovery, Conformance, ML tabs)</td></tr>
+</table>
+
+<h2>SLIDE 13 — Recommendations, limitations and conclusion</h2>
+<table class="kv">
+<tr><td>Title</td><td>Recommendations, Limitations and Next Steps</td></tr>
+<tr><td>Bullets</td><td>
+<b>Recommendations</b><br>
+• Decongest Observation — second ward-round slot plus a dedicated discharge desk<br>
+• Fast-track morning laboratory sampling (second-largest wait category)<br>
+• Roster to the load curve: Friday ~14:00, late-morning to mid-afternoon band<br>
+• Deploy the leakage-free long-stay flag at admission (zero false positives)<br>
+• Standardise the top 5 variants, then re-run conformance quarterly<br><br>
+<b>Limitations</b><br>
+• Synthetic reference data; conformance 1.0 is a property of the generator<br>
+• Only 3 positive test cases — wide confidence interval on F1 and recall<br>
+• DFG replay is less precise than Petri-net alignment<br><br>
+<b>Next steps</b><br>
+• Integrate a real HIS/EMR feed (HL7 / FHIR), add class balancing and SHAP explanation,<br>
+  build a what-if simulator, add drift monitoring<br><br>
+<b>Conclusion:</b> from raw event log to actionable, deployable insight — in one reproducible pipeline.
+</td></tr>
+</table>
+
+<h2>Speaker notes — 12 minute timing plan</h2>
+<table>
+<tr><th>Slides</th><th>Minutes</th><th>Focus</th></tr>
+<tr><td>1–2</td><td>0:00 – 1:00</td><td>Title, agenda — brisk</td></tr>
+<tr><td>3–4</td><td>1:00 – 2:30</td><td>Problem and approach</td></tr>
+<tr><td>5–6</td><td>2:30 – 4:00</td><td>Data and methodology</td></tr>
+<tr><td>7–8</td><td>4:00 – 6:00</td><td>Process model and variants — the core contribution</td></tr>
+<tr><td>9–10</td><td>6:00 – 8:00</td><td>Analytics and business numbers</td></tr>
+<tr><td>11</td><td>8:00 – 10:00</td><td>Conformance and prediction</td></tr>
+<tr><td>12</td><td>10:00 – 11:30</td><td>Live dashboard demonstration</td></tr>
+<tr><td>13</td><td>11:30 – 12:00</td><td>Recommendations and close</td></tr>
+</table>
+
+<h2>Anticipated questions</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Data asli hai?</td><td>Reference run synthetic hai, confidentiality constraint ke kaaran. Pipeline real log par <code>python run_all.py --skip-data</code> se chal jaata hai.</td></tr>
+<tr><td>Fitness 100 % kyun?</td><td>Synthetic generator ke saare paths model me cover hote hain. Real data par 0.70–0.95 expected hai.</td></tr>
+<tr><td>Leakage-free kya hai?</td><td>Outcome ke baad bante duration columns model se hata diye, warna 1.000 accuracy fake hoti.</td></tr>
+<tr><td>Business impact?</td><td>Bottleneck identified (Observation, 226.6 min), roster peaking Friday 14:00, long-stay flag at admission.</td></tr>
+<tr><td>Scale ho sakta hai?</td><td>13,583 events 17 seconds me process hote hain; pandas-based, million-row logs tak vertically scalable.</td></tr>
+</table>
+
+<p class="small">End of presentation content — 13 slides, 12-minute delivery.
+Yash Rahangdale · Ref. No. ITS/DA/1393 · Infotact Solutions · 10 October 2026.</p>
+
+</body></html>

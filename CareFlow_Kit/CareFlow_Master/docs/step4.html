@@ -1,0 +1,280 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<h1>STEP 4 — Poora Pipeline Chalana (Step-by-Step)</h1>
+<p class="small">Time: ~17 seconds runtime · Is step ka output: 14 charts + saare results files</p>
+
+<div class="box">
+Pipeline ke <b>6 stages</b> hain. Aap chahein to ek command me sab chalayein
+(<code>python run_all.py</code>) ya ek-ek karke (recommended — report me likhne ke liye
+har stage ka output samajhna zaroori hai).
+</div>
+
+<h2>4.1 Sabse pehle: venv activate kijiye</h2>
+<pre># Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# Mac / Linux
+source .venv/bin/activate</pre>
+<p>Prompt me <code>(.venv)</code> dikhna chahiye. Yeh <b>har naye terminal</b> me karna padta hai.</p>
+
+<h2>4.2 Ek-command wala raasta (fast)</h2>
+<pre>python run_all.py</pre>
+<p>Poora pipeline chal jayega. Expected output:</p>
+<pre>==========================================================================
+ CareFlow - Clinical Pathway Process Mining  |  full pipeline
+==========================================================================
+
+&gt;&gt;&gt; Step 1 - Generate clinical event log
+13:11:33 | INFO | careflow.generate_data | events=13664  cases=1500  activities=15
+
+&gt;&gt;&gt; Step 2 - Clean &amp; engineer features
+13:11:35 | INFO | careflow.preprocess | raw events=13664 raw cases=1500
+13:11:36 | INFO | careflow.preprocess | clean events=13583 cases=1500 variants=14
+13:11:36 | INFO | careflow.preprocess | saved -&gt; data/processed/event_log_clean.csv
+
+&gt;&gt;&gt; Step 3 - Process discovery
+13:11:40 | INFO | careflow.discover | events=13583 cases=1500
+13:11:40 | INFO | careflow.discover | variants=14 top_variant_share=29.9% dfg_edges=28
+
+&gt;&gt;&gt; Step 4 - Insights &amp; visualisation
+13:11:44 | INFO | careflow.insights | total cases=1500 cost=INR 25886761 bottleneck=Observation
+
+&gt;&gt;&gt; Step 5 - Conformance checking
+13:11:46 | INFO | careflow.conformance | cases=1500 fitness=1.0000 conforming=100.0%
+
+&gt;&gt;&gt; Step 6 - Machine-learning model
+13:12:46 | INFO | careflow.ml | design matrix: 1500 cases | full=19 features | leakage-free=14 features
+13:12:51 | INFO | careflow.ml | [full         ] random_forest   acc=1.000 f1=1.000 auc=1.000
+13:12:55 | INFO | careflow.ml | [leakage_free ] gradient_boosting acc=0.997 f1=0.800 auc=0.998
+13:13:03 | INFO | careflow.ml | saved production model -&gt; outputs/models/best_model.joblib
+
+==========================================================================
+ Pipeline finished in 16.5 s
+==========================================================================</pre>
+
+<h2>4.3 Stage-by-stage wala raasta (recommended — report ke liye)</h2>
+
+<h3>STAGE 1 — Event log banana / import karna</h3>
+<pre>python src/generate_data.py</pre>
+<p><b>Kya hota hai:</b> 1,500 patients ka 6 mahine ka hospital event log banta hai — 4 clinical
+pathways, 15 activities, 28 resources, aur jaan-boojh kar daali gayi data-quality galtiyan.</p>
+<p><b>Output files:</b> <code>data/raw/event_log.csv</code> (13,664 rows),
+<code>data/raw/case_attributes.csv</code> (1,500 rows)</p>
+<p><b>Verification:</b></p>
+<pre>python -c "import pandas as pd; d=pd.read_csv('data/raw/event_log.csv'); print(len(d), d.case_id.nunique(), d.activity.nunique())"
+13664 1500 15</pre>
+
+<h3>STAGE 2 — Data cleaning aur feature engineering</h3>
+<pre>python src/preprocess.py</pre>
+<p><b>Kya hota hai</b> (yeh 7 kaam karta hai):</p>
+<ol>
+<li>Timestamp ko proper datetime me convert karta hai</li>
+<li>Duplicate events hatata hai (same case + activity + time)</li>
+<li>Blank <code>resource</code> ko <code>UNASSIGNED</code> se bharta hai</li>
+<li>Negative / ghalat numeric values ko 0 kar deta hai</li>
+<li>Bahut chhote (&lt;3 events) ya bahut bade (&gt;200 events) cases hata deta hai</li>
+<li>Features banata hai: waiting time, elapsed time, rework flag, shift, weekday, month</li>
+<li>Har case ka <b>variant</b> (activity sequence ki string) likh deta hai</li>
+</ol>
+<p><b>Output:</b> <code>data/processed/event_log_clean.csv</code> +
+<code>outputs/reports/preprocessing_report.json</code></p>
+<pre>{
+  "rows_in": 13664,        "cases_in": 1500,
+  "duplicates_removed": 81, "missing_resource_filled": 203,
+  "rows_out": 13583,       "cases_out": 1500,
+  "activities_out": 15,    "resources_out": 28,   "variants_out": 14,
+  "date_min": "2026-03-01 07:26:00", "date_max": "2026-08-31 05:46:50"
+}</pre>
+<div class="ok">
+<b>Yeh table report me zaroor daaliye</b> — “data cleaning me kya-kya kiya” wala section
+issee banta hai.
+</div>
+
+<h3>STAGE 3 — Process discovery (asli pathway dhoondhna)</h3>
+<pre>python src/discover_models.py --miner inductive</pre>
+<p><b>Kya hota hai:</b> Directly-Follows Graph (DFG) banta hai jo batata hai kaunsa step kaunse
+step ke baad aata hai aur kitni baar. Saath me top-10 variants aur activity statistics.</p>
+<p><b>Output:</b></p>
+<table>
+<tr><th>File</th><th>Kya hai</th></tr>
+<tr><td><code>outputs/figures/dfg_careflow.png</code></td><td>Process model ka diagram</td></tr>
+<tr><td><code>outputs/figures/variants_top10.png</code></td><td>Top 10 pathway variants ka chart</td></tr>
+<tr><td><code>outputs/reports/dfg_edges.csv</code></td><td>28 edges with counts</td></tr>
+<tr><td><code>outputs/reports/variants.csv</code></td><td>Variant + case count + %</td></tr>
+<tr><td><code>outputs/reports/activity_stats.csv</code></td><td>Per-activity events, wait, cost</td></tr>
+<tr><td><code>outputs/reports/discovery_summary.json</code></td><td>Summary metrics</td></tr>
+<tr><td><code>outputs/models/petri_net_inductive.png</code></td><td>Petri net (sirf pm4py install ho to)</td></tr>
+</table>
+<pre>{
+  "cases": 1500, "events": 13583, "activities": 15, "dfg_edges": 28,
+  "unique_variants": 14, "top_variant_share_pct": 29.87,
+  "top_5_variant_share_pct": 80.94,
+  "start_activities": [["Registration", 1500]],
+  "end_activities":   [["Discharge", 1500]],
+  "pm4py_available": false, "miner": "inductive"
+}</pre>
+<div class="box">
+<b>Interpretation (viva me bolein):</b> 14 variants matlab patients 14 alag-alag raste le rahe hain.
+Top 1 variant 29.87 % cases cover karta hai aur top 5 milakar 80.94 % — yaani zyada tar patients
+ek “standard” pathway follow karte hain, baaki exceptional cases hain.
+</div>
+<p>Alag miner try karna (agar pm4py install hai):</p>
+<pre>python src/discover_models.py --miner heuristics
+python src/discover_models.py --miner alpha</pre>
+
+<h3>STAGE 4 — Analytics aur business insights</h3>
+<pre>python src/analyze_insights.py</pre>
+<p><b>Kya hota hai:</b> 7 tarah ke analysis + 7 charts:</p>
+<table>
+<tr><th>Chart</th><th>Kya dikhata hai</th></tr>
+<tr><td><code>kpi_los_distribution.png</code></td><td>Patients kitni der hospital me rehte hain (LOS)</td></tr>
+<tr><td><code>case_volume_trend.png</code></td><td>Har mahine kitne patients aaye</td></tr>
+<tr><td><code>bottleneck_waiting.png</code></td><td>Kis step par sabse zyada wait hota hai</td></tr>
+<tr><td><code>cost_by_department.png</code></td><td>Kis department ka kharcha sabse zyada</td></tr>
+<tr><td><code>resource_workload.png</code></td><td>Kaunsa staff member sabse busy hai</td></tr>
+<tr><td><code>hourly_heatmap.png</code></td><td>Hafte ke kaunse din, kis ghante load zyada</td></tr>
+<tr><td><code>pathway_comparison.png</code></td><td>Har pathway ka LOS vs cost</td></tr>
+</table>
+<p><b>Real results (reference run):</b></p>
+<table class="kv">
+<tr><td>Average length of stay</td><td>9.65 hours</td></tr>
+<tr><td>Median LOS</td><td>6.14 hours</td></tr>
+<tr><td>P90 LOS</td><td>18.69 hours</td></tr>
+<tr><td>Long-stay cases (&gt;24 h)</td><td>17 cases (1.13 %)</td></tr>
+<tr><td>Biggest bottleneck</td><td><b>Observation</b> — 226.61 min average wait</td></tr>
+<tr><td>Total waiting time (all cases)</td><td>868,869.6 minutes</td></tr>
+<tr><td>Total treatment cost</td><td>INR 25,886,760.54</td></tr>
+<tr><td>Costliest department</td><td>Operation Theatre</td></tr>
+<tr><td>Average cost per case</td><td>INR 17,257.84</td></tr>
+<tr><td>Busiest resource</td><td><code>REC-01</code> — 1,038 events</td></tr>
+<tr><td>Peak load</td><td>Friday, 14:00</td></tr>
+</table>
+<p><b>Pathway-wise:</b></p>
+<table>
+<tr><th>Pathway</th><th>Cases</th><th>Avg LOS (h)</th><th>Avg cost (INR)</th></tr>
+<tr><td>P1 Outpatient Standard</td><td>521</td><td>4.52</td><td>5,150.28</td></tr>
+<tr><td>P3 Chronic Followup</td><td>400</td><td>5.77</td><td>7,169.72</td></tr>
+<tr><td>P4 ICU Escalation</td><td>204</td><td>15.15</td><td>22,281.61</td></tr>
+<tr><td>P2 Emergency Surgical</td><td>375</td><td>17.94</td><td>42,107.01</td></tr>
+</table>
+<p><b>Output:</b> 7 PNG charts + <code>outputs/reports/insights.json</code> +
+<code>outputs/reports/insights_summary.md</code></p>
+
+<h3>STAGE 5 — Conformance checking (kitna deviate ho rahe hain)</h3>
+<pre>python src/conformance.py</pre>
+<p><b>Kya hota hai:</b> har patient ke journey ko discovered model se compare karta hai
+<b>token-based replay</b> se. Jo cheez model me allow nahi hai woh “deviation” ban jaati hai.</p>
+<p><b>Fitness formula (report me likhiye):</b></p>
+<pre>fitness = 0.5 x (1 - missing / produced) + 0.5 x (1 - remaining / produced)
+    produced  = actual me chalne wale steps
+    consumed  = model ke hisaab se sahi steps
+    missing   = model ke allowed transitions jo trace me nahi mile
+    remaining = trace ke end me bache hue model tokens</pre>
+<pre>{
+  "model": "DFG (directly-follows graph)", "min_edge_count": 3,
+  "cases_checked": 1500, "model_edges": 28,
+  "average_fitness": 1.0,
+  "perfectly_fitting_cases_pct": 100.0,
+  "fully_conforming_cases_pct": 100.0,
+  "cases_with_deviations": 0,
+  "top_deviations": []
+}</pre>
+<div class="warn">
+<b>Honest interpretation (yeh viva me zaroor boliye):</b> fitness 1.0 aaya kyunki yeh
+<b>synthetic data</b> hai jo fixed pathway templates se bana hai — jitni bhi rework loops
+hain, woh sab generator ke andar allowed hain, isliye model khud ke data ko 100 % explain
+kar leta hai. <b>Asli hospital log</b> par fitness generally <b>0.70 – 0.95</b> aata hai,
+aur <code>top_deviations</code> me “Lab Test → Discharge” jaisi skip-hop patterns dikhte hain.
+Yeh project ko kamzor nahi banata — methodology wahi hai, sirf data synthetic hai.
+</div>
+<p><b>Output:</b> <code>conformance_report.json</code>, <code>conformance_by_variant.csv</code>,
+<code>conformance_fitness.png</code>, <code>deviation_types.png</code></p>
+
+<h3>STAGE 6 — Long-stay prediction model</h3>
+<pre>python src/ml_model.py</pre>
+<p><b>Kya hota hai:</b> 3 algorithms (Logistic Regression, Random Forest, Gradient Boosting)
+train hote hain, 2 feature sets par:</p>
+<ul>
+<li><b>full</b> — 19 features (sab kuch, including duration aggregates)</li>
+<li><b>leakage_free</b> — 14 features (duration-derived columns hata di, kyunki asli hospital me
+admission ke waqt waiting time pata nahi hota — isse “data leakage” kehte hain)</li>
+</ul>
+<div class="box">
+<b>Data leakage kya hai?</b> Agar aap model ko <code>total_wait</code> jaise columns doge jo
+<i>outcome ke baad</i> bante hain, to model 100 % accuracy dikha dega — lekin asli hospital me
+aise model ka koi fayda nahi. Isliye <b>production model leakage-free features par banaya gaya</b>.
+Yeh baat report aur presentation me likhne se aapka kaam <b>professional</b> lagta hai.
+</div>
+<table>
+<tr><th>Feature set</th><th>Model</th><th>Accuracy</th><th>F1</th><th>ROC-AUC</th><th>CV F1</th></tr>
+<tr><td rowspan="3">Full (19 feat.)</td><td>Logistic Regression</td><td>1.000</td><td>1.000</td><td>1.000</td><td>0.727 ± 0.167</td></tr>
+<tr><td>Random Forest</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td>Gradient Boosting</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td rowspan="3"><b>Leakage-free (14 feat.)</b></td><td>Logistic Regression</td><td>0.993</td><td>0.500</td><td>0.987</td><td>0.080 ± 0.160</td></tr>
+<tr><td>Random Forest</td><td>0.990</td><td>0.000</td><td>0.996</td><td>0.000 ± 0.000</td></tr>
+<tr><td><b>Gradient Boosting ★</b></td><td><b>0.997</b></td><td><b>0.800</b></td><td><b>0.998</b></td><td>0.180 ± 0.223</td></tr>
+</table>
+<p>★ = production model (<code>outputs/models/best_model.joblib</code>)</p>
+<p><b>Output:</b> <code>best_model.joblib</code>, <code>model_metadata.json</code>,
+<code>model_metrics.json</code>, <code>feature_importance.csv</code>,
+<code>model_roc.png</code>, <code>model_confusion_matrix.png</code>,
+<code>feature_importance.png</code>. Poori detail: <code>CareFlow_Model_Evaluation_Results.pdf</code></p>
+
+<h2>4.4 Selective run (kuch stages skip karna)</h2>
+<pre>python run_all.py --skip-ml      # ML stage ke bina (fast demo ke liye)
+python run_all.py --skip-data    # apna data use karna (naya generate nahi)</pre>
+
+<h2>4.5 Settings badalna — config/config.yaml</h2>
+<table>
+<tr><th>Setting</th><th>Default</th><th>Kya karta hai</th></tr>
+<tr><td><code>n_cases</code></td><td>1500</td><td>Kitne patients ka data</td></tr>
+<tr><td><code>los_threshold_hours</code></td><td>24</td><td>“Long stay” ki definition — 48 karke dekhiye</td></tr>
+<tr><td><code>noise_threshold</code></td><td>0.20</td><td>Inductive Miner me kitni noise ignore karni hai</td></tr>
+<tr><td><code>min_edge_count</code></td><td>3</td><td>DFG me kam se kam kitni baar edge aa raha ho</td></tr>
+<tr><td><code>top_variants</code></td><td>10</td><td>Chart me kitne variants dikhane hain</td></tr>
+<tr><td><code>test_size</code></td><td>0.20</td><td>ML me test data ka hissa (80/20 split)</td></tr>
+<tr><td><code>models</code></td><td>3 models</td><td>Kaunse algorithms train karne hain</td></tr>
+</table>
+<p>Setting badalne ke baad pipeline dobara chalaiye — results update ho jayenge.</p>
+
+<h2>4.6 Poora output ka structure (milne ke baad check kijiye)</h2>
+<pre>outputs/
+|-- figures/    (14 PNG files)
+|   |-- dfg_careflow.png            kpi_los_distribution.png
+|   |-- variants_top10.png          case_volume_trend.png
+|   |-- bottleneck_waiting.png      cost_by_department.png
+|   |-- resource_workload.png       hourly_heatmap.png
+|   |-- pathway_comparison.png      conformance_fitness.png
+|   |-- deviation_types.png         model_roc.png
+|   |-- model_confusion_matrix.png  feature_importance.png
+|-- reports/    (JSON + CSV + MD)
+|   |-- preprocessing_report.json   discovery_summary.json
+|   |-- insights.json               insights_summary.md
+|   |-- conformance_report.json     conformance_by_case.csv
+|   |-- conformance_by_variant.csv  model_metrics.json
+|   |-- dfg_edges.csv               variants.csv
+|   |-- activity_stats.csv          feature_importance.csv
+`-- models/
+    |-- best_model.joblib
+    `-- model_metadata.json</pre>
+
+<pre>dir outputs\figures        # Windows
+ls -lh outputs/figures     # Mac / Linux</pre>
+
+<h2>4.7 Troubleshooting</h2>
+<table>
+<tr><th>Error / problem</th><th>Solution</th></tr>
+<tr><td><code>FileNotFoundError: config/config.yaml</code></td><td>Aap galat folder me ho. <code>cd</code> karke <code>CareFlow</code> folder me jaaiye</td></tr>
+<tr><td><code>ModuleNotFoundError</code></td><td>venv activate nahi hai → Step 4.1</td></tr>
+<tr><td><code>KeyError</code> kisi column ka</td><td>Aapke CSV ke column names spec se match nahi kar rahe → Step 3.2</td></tr>
+<tr><td>Charts empty aa rahi hain</td><td><code>python run_all.py</code> dobara chalaiye, aur <code>data/processed/</code> folder check kijiye</td></tr>
+<tr><td>ML stage bahut slow</td><td><code>python run_all.py --skip-ml</code></td></tr>
+<tr><td>pm4py graphviz error</td><td>Ignore kijiye — DFG model ban chuka hai. Ya <code>pip uninstall pm4py</code></td></tr>
+<tr><td>Kuch bhi pura nahi chal raha</td><td>Outputs folder delete kijiye aur <code>python run_all.py</code> dobara</td></tr>
+</table>
+
+<div class="ok">
+<b>14 charts + 12 result files ban gaye!</b> Ab Step 5 — dashboard aur demonstration.
+</div>
+
+</body></html>

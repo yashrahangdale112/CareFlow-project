@@ -1,0 +1,15 @@
+{
+  "rows_in": 13664,
+  "cases_in": 1500,
+  "duplicates_removed": 81,
+  "bad_timestamps_removed": 0,
+  "missing_resource_filled": 203,
+  "cases_removed_by_length": 0,
+  "rows_out": 13583,
+  "cases_out": 1500,
+  "activities_out": 15,
+  "resources_out": 28,
+  "variants_out": 14,
+  "date_min": "2026-03-01 07:26:00",
+  "date_max": "2026-08-31 05:46:50.472200"
+}

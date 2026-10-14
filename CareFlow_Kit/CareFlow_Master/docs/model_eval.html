@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="cover">
+  <div class="badge">DELIVERABLE 5</div>
+  <h1>Model Evaluation Results</h1>
+  <div class="sub">CareFlow — Long-Stay Prediction Model</div>
+  <div class="meta">
+    <b>Intern:</b> Yash Rahangdale · <b>Ref. No.:</b> ITS/DA/1393<br>
+    <b>Domain:</b> Data Analytics · <b>Role:</b> Data Associate L1 Intern<br>
+    <b>Report date:</b> 10 October 2026
+  </div>
+</div>
+
+<h2>1. Evaluation set-up</h2>
+<table class="kv">
+<tr><td>Prediction task</td><td>Binary classification — will the patient journey exceed 24 hours?</td></tr>
+<tr><td>Target variable</td><td><code>y_long_stay = 1</code> if <code>los_hours &gt; 24</code>, else <code>0</code></td></tr>
+<tr><td>Unit of analysis</td><td>One row per patient case</td></tr>
+<tr><td>Total cases</td><td>1,500</td></tr>
+<tr><td>Positive rate</td><td>17 cases = <b>1.13 %</b> (severely imbalanced)</td></tr>
+<tr><td>Train / test split</td><td>1,200 / 300 (stratified 80:20, <code>random_state = 42</code>)</td></tr>
+<tr><td>Test-set positives</td><td>3 of 300</td></tr>
+<tr><td>Algorithms compared</td><td>Logistic Regression, Random Forest (350 trees, depth 12), Gradient Boosting</td></tr>
+<tr><td>Feature sets compared</td><td>Full (19 features) vs Leakage-free (14 features)</td></tr>
+<tr><td>Selection metric</td><td>Test F1 (accuracy is misleading at a 1.13 % positive rate)</td></tr>
+<tr><td>Secondary validation</td><td>5-fold cross-validated F1 on the full dataset</td></tr>
+</table>
+
+<h2>2. Feature sets</h2>
+<h3>2.1 Full feature set — 19 features</h3>
+<table>
+<tr><th>Numeric (14)</th><th>Categorical (5)</th></tr>
+<tr><td><code>age</code>, <code>triage_level</code>, <code>n_events</code>,
+<code>n_unique_activities</code>, <code>total_wait</code>, <code>avg_wait</code>,
+<code>max_wait</code>, <code>total_service</code>, <code>n_rework</code>, <code>n_night</code>,
+<code>rework_rate</code>, <code>wait_ratio</code>, <code>has_surgery</code>, <code>has_icu</code></td>
+<td><code>gender</code>, <code>admission_type</code>, <code>pathway</code>,
+<code>first_activity</code>, <code>last_activity</code></td></tr>
+</table>
+
+<h3>2.2 Leakage-free feature set — 14 features</h3>
+<p>Five duration-derived columns are <b>removed</b>: <code>total_wait</code>,
+<code>avg_wait</code>, <code>max_wait</code>, <code>total_service</code>,
+<code>wait_ratio</code>.</p>
+<div class="box">
+<b>Why remove them?</b> These columns are computed from the timestamps of the same journey whose
+length is the prediction target. In a real hospital, the long-stay decision must be taken
+<i>at admission</i>, when no waiting time or service duration has yet occurred. Including them
+therefore produces an academically perfect but operationally useless model — a textbook case of
+<b>target leakage</b>. The leakage-free set (11 numeric + 3 binary/derived + 5 categorical) is what
+the deployment model actually uses.
+</div>
+
+<h2 class="pagebreak">3. Results — all models, both feature sets</h2>
+<table>
+<tr><th>Feature set</th><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th><th>CV F1 (5-fold)</th></tr>
+<tr><td rowspan="3">Full (19 feat.)</td><td>Logistic Regression</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>0.727 ± 0.167</td></tr>
+<tr><td>Random Forest</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td>Gradient Boosting</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td rowspan="3"><b>Leakage-free (14 feat.)</b></td><td>Logistic Regression</td><td>0.993</td><td>1.000</td><td>0.333</td><td>0.500</td><td>0.987</td><td>0.080 ± 0.160</td></tr>
+<tr><td>Random Forest</td><td>0.990</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.996</td><td>0.000 ± 0.000</td></tr>
+<tr><td><b>Gradient Boosting ★</b></td><td><b>0.997</b></td><td><b>1.000</b></td><td><b>0.667</b></td><td><b>0.800</b></td><td><b>0.998</b></td><td>0.180 ± 0.223</td></tr>
+</table>
+<p>★ = <b>production model</b>, saved to <code>outputs/models/best_model.joblib</code>.</p>
+<img src="../outputs/figures/model_roc.png" alt="ROC curves">
+<p class="small">Figure 1 — ROC curves for every model in both feature sets.</p>
+
+<h2>4. Production model — detailed evaluation</h2>
+<table class="kv">
+<tr><td>Model</td><td>Gradient Boosting Classifier</td></tr>
+<tr><td>Feature set</td><td>Leakage-free (14 features)</td></tr>
+<tr><td>Training rows</td><td>1,200</td></tr>
+<tr><td>Test rows</td><td>300</td></tr>
+<tr><td>Accuracy</td><td>0.9967</td></tr>
+<tr><td>Precision (long stay)</td><td>1.000</td></tr>
+<tr><td>Recall (long stay)</td><td>0.6667</td></tr>
+<tr><td>F1 (long stay)</td><td>0.8000</td></tr>
+<tr><td>ROC-AUC</td><td>0.9983</td></tr>
+</table>
+
+<h3>4.1 Classification report</h3>
+<table>
+<tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>Support</th></tr>
+<tr><td>0 — Normal stay</td><td>0.9966</td><td>1.0000</td><td>0.9983</td><td>297</td></tr>
+<tr><td>1 — Long stay</td><td>1.0000</td><td>0.6667</td><td>0.8000</td><td>3</td></tr>
+<tr><td>Macro average</td><td>0.9983</td><td>0.8333</td><td>0.8992</td><td>300</td></tr>
+<tr><td>Weighted average</td><td>0.9967</td><td>0.9967</td><td>0.9963</td><td>300</td></tr>
+</table>
+
+<h3>4.2 Confusion matrix</h3>
+<pre>
+                     Predicted
+                  Normal    Long
+  Actual Normal     297       0      (0 false alarms)
+         Long         1       2      (1 missed long stay)
+</pre>
+<img src="../outputs/figures/model_confusion_matrix.png" alt="Confusion matrix">
+<p class="small">Figure 2 — Confusion matrix of the production model on the 300-case held-out test set.</p>
+
+<h3>4.3 Feature importance (top drivers)</h3>
+<img src="../outputs/figures/feature_importance.png" alt="Feature importance">
+<p class="small">Figure 3 — Top 15 feature importances of the production Gradient Boosting model.</p>
+<table>
+<tr><th>Rank</th><th>Feature</th><th>Interpretation</th></tr>
+<tr><td>1</td><td><code>n_events</code></td><td>More recorded steps ⇒ longer, more complex journey</td></tr>
+<tr><td>2</td><td><code>n_unique_activities</code></td><td>Broader span of care — surgical/ICU journeys dominate</td></tr>
+<tr><td>3</td><td><code>has_icu</code></td><td>ICU transfer is a structural marker of a long stay</td></tr>
+<tr><td>4</td><td><code>n_rework</code></td><td>Repeated steps signal clinical complications</td></tr>
+<tr><td>5</td><td><code>pathway</code></td><td>Template choice already separates short and long journeys</td></tr>
+<tr><td>6</td><td><code>has_surgery</code></td><td>Surgery implies admission and post-operative observation</td></tr>
+<tr><td>7</td><td><code>triage_level</code></td><td>Lower triage number = higher acuity = longer stay</td></tr>
+<tr><td>8</td><td><code>admission_type</code></td><td>Emergency admissions stay longer than outpatients</td></tr>
+</table>
+<p class="small">Exact importance values are in <code>outputs/reports/feature_importance.csv</code>.</p>
+
+<h2>5. Interpretation of the leakage comparison</h2>
+<table>
+<tr><th>Observation</th><th>Explanation</th></tr>
+<tr><td>Full feature set scores a perfect 1.000 on every metric</td><td>It contains waiting-time and service-time aggregates derived from the same timestamps that define length of stay — the target is effectively an arithmetic function of the inputs</td></tr>
+<tr><td>Cross-validated F1 also 1.000 for the tree ensembles</td><td>The leakage is structural, not a lucky split, so it survives resampling</td></tr>
+<tr><td>Logistic Regression full-set CV F1 is only 0.727</td><td>A linear boundary cannot combine the leaky columns as cleanly; it shows the leakage is interaction-driven</td></tr>
+<tr><td>Removing 5 columns drops accuracy by only 0.33 pp</td><td>The genuinely predictive signal lives in structural, admission-time features</td></tr>
+<tr><td>ROC-AUC stays at 0.998 after removal</td><td>Ranking ability is preserved — the model still separates risk correctly</td></tr>
+<tr><td>Random Forest F1 collapses to 0.000</td><td>At a 3-positive test set, an ensemble that predicts "no" for everything still scores 0.990 accuracy — which is exactly why F1, not accuracy, was used for selection</td></tr>
+</table>
+
+<h2>6. Metric definitions used</h2>
+<table>
+<tr><th>Metric</th><th>Formula</th><th>Why it matters here</th></tr>
+<tr><td>Accuracy</td><td>(TP + TN) / total</td><td>Reported for completeness, but misleading at 1.13 % positives</td></tr>
+<tr><td>Precision</td><td>TP / (TP + FP)</td><td>How many flagged patients are genuinely long stays — controls alarm fatigue</td></tr>
+<tr><td>Recall</td><td>TP / (TP + FN)</td><td>How many long stays are caught — controls clinical risk</td></tr>
+<tr><td>F1</td><td>2 · P · R / (P + R)</td><td>Balances the two — used as the selection metric</td></tr>
+<tr><td>ROC-AUC</td><td>Area under TPR vs FPR curve</td><td>Threshold-independent ranking quality</td></tr>
+<tr><td>CV F1</td><td>Mean F1 across 5 folds</td><td>Stability of the model, not just one split</td></tr>
+<tr><td>Confusion matrix</td><td>[[TN, FP], [FN, TP]]</td><td>Shows the actual error direction</td></tr>
+</table>
+
+<h2>7. Uncertainty and honest limitations</h2>
+<div class="warn">
+<ul>
+<li>The test set contains only <b>3 positive cases</b>. One additional miss would drop recall from
+0.667 to 0.333 and F1 from 0.800 to 0.500. These metrics are indicative, not precise.</li>
+<li>Cross-validated F1 for the production model is <b>0.180 ± 0.223</b> — high variance driven by
+folds that contain very few positives. Accuracy and ROC-AUC remain stable.</li>
+<li>All data is <b>synthetic</b>. Real hospital data has messier feature distributions, missing
+values and drift; expect lower absolute performance.</li>
+<li>Long-stay cases (1.13 %) were not artificially oversampled or rescaled. SMOTE or
+class-weight balancing would be the next experiment.</li>
+<li>The model is explanatory at the operational level and is <b>not</b> a clinical decision tool.</li>
+</ul>
+</div>
+
+<h2>8. Recommended next experiments</h2>
+<ol>
+<li>Apply <code>class_weight='balanced'</code> and SMOTE oversampling; re-measure F1 and recall.</li>
+<li>Replace the binary target with regression on <code>los_hours</code> and report MAE/RMSE.</li>
+<li>Tune the decision threshold via a precision–recall curve instead of using 0.5.</li>
+<li>Add SHAP values for per-patient explanation.</li>
+<li>Re-train on a real hospital log and compare against the synthetic baseline in this report.</li>
+<li>Introduce time-based (rolling) validation to simulate production deployment.</li>
+</ol>
+
+<h2>9. Reproduce this evaluation</h2>
+<pre>python src/ml_model.py
+
+# outputs written:
+#   outputs/models/best_model.joblib
+#   outputs/models/model_metadata.json
+#   outputs/reports/model_metrics.json
+#   outputs/reports/feature_importance.csv
+#   outputs/figures/model_roc.png
+#   outputs/figures/model_confusion_matrix.png
+#   outputs/figures/feature_importance.png</pre>
+<p class="small">Seed = 42 throughout, so every number in this document is reproducible.</p>
+
+<h2>10. Verdict</h2>
+<table class="kv">
+<tr><td>Production model</td><td>Gradient Boosting on 14 leakage-free features</td></tr>
+<tr><td>Deployable?</td><td>Yes, as an admission-time long-stay risk flag (zero false positives on the test set)</td></tr>
+<tr><td>Headline metrics</td><td>Accuracy 0.997 · Precision 1.000 · Recall 0.667 · F1 0.800 · ROC-AUC 0.998</td></tr>
+<tr><td>Main caveat</td><td>Only 3 positive test cases — metrics must be re-validated on a larger, real dataset</td></tr>
+</table>
+
+<p class="small">End of model evaluation report — Yash Rahangdale, Ref. No. ITS/DA/1393, 10 October 2026.</p>
+
+</body></html>

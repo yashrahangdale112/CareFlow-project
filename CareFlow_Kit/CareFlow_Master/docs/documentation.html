@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset="utf-8"><title>CareFlow Project Documentation</title>
+<style>
+@page{size:A4;margin:14mm}
+body{font-family:"DejaVu Sans",Arial,sans-serif;font-size:10.5pt;line-height:1.45;color:#12212e}
+h1{font-size:20pt;color:#0b5d7a;border-bottom:3px solid #0b5d7a;padding-bottom:6px}
+h2{font-size:13pt;color:#0b5d7a;margin:14px 0 4px;border-left:5px solid #17a2b8;padding-left:8px}
+table{border-collapse:collapse;width:100%;font-size:9pt;margin:6px 0}
+th{background:#0b5d7a;color:#fff;text-align:left;padding:5px}
+td{border:1px solid #cfe0e6;padding:4px 6px;vertical-align:top}
+code{font-family:"DejaVu Sans Mono",monospace;font-size:9pt;background:#f3f7f9;padding:1px 3px}
+pre{background:#f3f7f9;border-left:4px solid #0b5d7a;padding:7px;white-space:pre-wrap;font-size:8.7pt}
+</style></head><body>
+<h1>CareFlow — Project Documentation</h1>
+<p><b>Project:</b> CareFlow: Clinical Pathway Process Mining · <b>Intern:</b> Yash Rahangdale ·
+<b>Role:</b> Data Associate L1 Intern (Data Analytics) · <b>Organisation:</b> Infotact Solutions ·
+<b>Ref. No.:</b> ITS/DA/1393 · <b>Duration:</b> 10 Oct 2026 – 10 Nov 2026</p>
+<h2>1. Objective</h2>
+<p>Read a hospital <b>event log</b> and reconstruct the real clinical pathway; find bottlenecks, rework and
+deviations; predict long stays; and publish results as charts, reports and a dashboard — using
+industry-standard data-analytics workflow (collect → clean → validate → analyse → visualise → document).</p>
+<h2>2. Data model (process-mining event log)</h2>
+<p>One row = one <b>event</b>. Minimum columns: <code>case_id</code> (patient journey),
+<code>activity</code> (step), <code>timestamp</code>. Optional: <code>resource, department, wait_minutes,
+service_minutes, cost_inr</code>. Case-level attributes: <code>age, gender, triage_level, admission_type,
+pathway, los_hours, total_cost_inr</code>.</p>
+<h2>3. Database design (star schema)</h2>
+<table><tr><th>Table</th><th>Type</th><th>Key columns</th></tr>
+<tr><td>dim_patient</td><td>dimension</td><td>patient_id, age, gender</td></tr>
+<tr><td>dim_activity</td><td>dimension</td><td>activity, activity_group</td></tr>
+<tr><td>dim_department</td><td>dimension</td><td>department</td></tr>
+<tr><td>dim_resource</td><td>dimension</td><td>resource, department</td></tr>
+<tr><td>dim_date</td><td>dimension</td><td>date_key, day_name, month_name, is_weekend</td></tr>
+<tr><td>fact_case</td><td>fact</td><td>case_id, los_hours, total_cost_inr, is_long_stay</td></tr>
+<tr><td>fact_event</td><td>fact</td><td>event_id, case_id, event_index, activity, event_timestamp, wait_minutes</td></tr></table>
+<h2>4. Cleaning rules applied (audit logged)</h2>
+<table><tr><th>Rule</th><th>Reason</th></tr>
+<tr><td>Drop rows without case_id / activity / timestamp</td><td>cannot be mined</td></tr>
+<tr><td>Remove exact duplicates (case + activity + timestamp)</td><td>double-scanned events — 81 removed</td></tr>
+<tr><td>Blank resource → UNKNOWN</td><td>keep the event, don't lose the path</td></tr>
+<tr><td>Negative wait / cost → 0</td><td>physically impossible</td></tr>
+<tr><td>service_minutes ≤ 0 → median</td><td>robust to outliers</td></tr>
+<tr><td>Cases &lt; 3 or &gt; 200 events dropped</td><td>too short / corrupt journeys</td></tr></table>
+<h2>5. Methods</h2>
+<p><b>Process discovery:</b> Directly-Follows Graph (DFG) + trace-variant analysis; optional Inductive /
+Heuristics / Alpha miner and token-based replay via pm4py. <b>Conformance:</b> token-based replay fitness
+per case and per variant, deviation typing. <b>Analytics:</b> KPI cards, bottleneck ranking by average wait,
+department cost, resource workload, weekday × hour heat map, LOS distribution. <b>Predictive:</b> binary
+classification of long stay (LOS &gt; 24 h) with leakage-free features, 5-fold cross-validation,
+ROC-AUC / F1 comparison and confusion matrix.</p>
+<h2>6. Results (reference run)</h2>
+<table><tr><th>KPI</th><th>Value</th></tr>
+<tr><td>Cases / events</td><td>1,500 / 13,583</td></tr>
+<tr><td>Activities / DFG edges</td><td>15 / 28</td></tr>
+<tr><td>Variants</td><td>14 (top 29.9 %)</td></tr>
+<tr><td>Average LOS</td><td>9.65 h (median 6.14 h, P90 18.69 h)</td></tr>
+<tr><td>Long-stay (&gt; 24 h)</td><td>17 cases (1.13 %)</td></tr>
+<tr><td>Worst bottleneck</td><td>Observation — 226.6 min average wait</td></tr>
+<tr><td>Costliest department</td><td>Operation Theatre — INR 9,381,243</td></tr>
+<tr><td>Average cost / case</td><td>INR 17,258</td></tr></table>
+<h2>7. Reproducibility</h2>
+<pre>pip install -r requirements.txt
+python run_all.py                 # all 6 stages
+python src/connect_db.py --engine sqlite
+python -m jupyter notebook notebooks/</pre>
+<h2>8. Limitations</h2>
+<p>Reference log is synthetic (no patient-confidential data available); on real data expect lower fitness.
+Resource dimension is coarse. Cost is activity-level, not invoice-level. Long-stay class is highly
+imbalanced (1.13 %), so accuracy is a misleading metric — AUC, recall and F1 are reported instead.</p>
+<p><b>Confidential — Infotact Solutions · prepared by Yash Rahangdale.</b></p>
+</body></html>

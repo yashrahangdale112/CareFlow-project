@@ -1,0 +1,52 @@
+{
+  "los_mean_hours": 9.65,
+  "los_median_hours": 6.14,
+  "los_p90_hours": 18.69,
+  "long_stay_cases": 17,
+  "long_stay_share_pct": 1.13,
+  "monthly_case_volume": {
+    "2026-03": 261,
+    "2026-04": 243,
+    "2026-05": 267,
+    "2026-06": 252,
+    "2026-07": 265,
+    "2026-08": 231
+  },
+  "top_bottleneck": "Observation",
+  "top_bottleneck_wait_min": 226.61,
+  "total_wait_minutes": 868869.6,
+  "total_cost_inr": 25886760.54,
+  "costliest_department": "Operation Theatre",
+  "avg_cost_per_case_inr": 17257.84,
+  "busiest_resource": "REC-01",
+  "busiest_resource_events": 1038,
+  "peak_load_hour": 14,
+  "peak_load_day": "Friday",
+  "pathways": [
+    {
+      "pathway": "P1_Outpatient_Standard",
+      "cases": 521,
+      "avg_los": 4.52,
+      "avg_cost": 5150.28
+    },
+    {
+      "pathway": "P3_Chronic_Followup",
+      "cases": 400,
+      "avg_los": 5.77,
+      "avg_cost": 7169.72
+    },
+    {
+      "pathway": "P4_ICU_Escalation",
+      "cases": 204,
+      "avg_los": 15.15,
+      "avg_cost": 22281.61
+    },
+    {
+      "pathway": "P2_Emergency_Surgical",
+      "cases": 375,
+      "avg_los": 17.94,
+      "avg_cost": 42107.01
+    }
+  ],
+  "cases": 1500
+}

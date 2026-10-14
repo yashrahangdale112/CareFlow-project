@@ -1,0 +1,205 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<h1>STEP 5 — Dashboard, Demonstration aur Submission</h1>
+<p class="small">Time: ~10 min · Is step ka output: live dashboard + demo script + submission pack</p>
+
+<h2>5.1 Dashboard chalana</h2>
+<pre>streamlit run dashboard/app.py</pre>
+<p>Terminal me aisa dikhega:</p>
+<pre>  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.1.5:8501</pre>
+<p>Browser apne aap khul jayega. Na khule to <code>http://localhost:8501</code> manually kholiye.</p>
+<p><b>Band karne ke liye:</b> terminal me <code>Ctrl + C</code> daba dijiye.</p>
+
+<div class="warn">
+<b>Important:</b> dashboard chalane se pehle <code>python run_all.py</code> chal chuka hona chahiye.
+Warna screen par red error aayega: <i>“Processed data not found. Run the pipeline first.”</i>
+</div>
+
+<h2>5.2 Dashboard me kya-kya hai</h2>
+
+<h3>Sidebar filters (left taraf)</h3>
+<table>
+<tr><th>Filter</th><th>Kya karta hai</th></tr>
+<tr><td>Care pathway</td><td>Sirf chuni hui pathways ka data dikhata hai</td></tr>
+<tr><td>Department</td><td>Sirf chune hue department</td></tr>
+<tr><td>Length of stay slider</td><td>LOS ki range set karta hai</td></tr>
+<tr><td>Triage level</td><td>Emergency ki severity ke hisaab se filter</td></tr>
+</table>
+<p class="small">Har filter turant sab charts, KPI cards aur tables update kar deta hai — yeh
+dashboard ki sabse acchi baat hai, demo me isko highlight kijiye.</p>
+
+<h3>5 KPI cards (top par)</h3>
+<table>
+<tr><th>KPI</th><th>Matlab</th></tr>
+<tr><td>Patient cases</td><td>Kitne patients (filter lagne ke baad)</td></tr>
+<tr><td>Total events</td><td>Kitni activities record hui</td></tr>
+<tr><td>Avg length of stay</td><td>Average kitne ghante hospital me rahe</td></tr>
+<tr><td>Avg cost / case</td><td>Per patient average kharcha</td></tr>
+<tr><td>Avg conformance fitness</td><td>Real cases model se kitna match karte hain</td></tr>
+</table>
+
+<h3>5 Tabs</h3>
+<table>
+<tr><th>Tab</th><th>Andar kya hai</th></tr>
+<tr><td><b>Overview</b></td><td>LOS histogram + long-stay threshold line, monthly volume line chart,
+bottleneck bar chart, department cost treemap, resource workload, pathway scatter,
+auto-generated insights list</td></tr>
+<tr><td><b>Process discovery</b></td><td>DFG diagram, top-10 variants, 4 metric cards
+(cases / activities / edges / variants), poori summary JSON</td></tr>
+<tr><td><b>Conformance</b></td><td>Fitness metric cards, fitness distribution, deviation
+bar chart, variant-wise conformance table</td></tr>
+<tr><td><b>ML model</b></td><td>Best model naam, saare models ka comparison table,
+ROC curve, confusion matrix, feature importance chart + table</td></tr>
+<tr><td><b>Data</b></td><td>Processed event log (300 rows preview) + filtered CSV download button</td></tr>
+</table>
+
+<h2>5.3 Screenshot lena (report me daalne ke liye)</h2>
+<ol>
+<li>Dashboard kholiye, sab filters default rakhiye</li>
+<li><b>Windows:</b> <code>Win + Shift + S</code> → area select kijiye.
+<b>Mac:</b> <code>Cmd + Shift + 4</code></li>
+<li>Yeh 4 screenshots zaroor lein:</li>
+</ol>
+<table>
+<tr><th>#</th><th>Kya capture karna hai</th><th>Report me kahan</th></tr>
+<tr><td>1</td><td>Poora Overview tab (KPI cards + 3-4 charts)</td><td>Results → Dashboard section</td></tr>
+<tr><td>2</td><td>Process discovery tab (DFG diagram)</td><td>Results → Process model</td></tr>
+<tr><td>3</td><td>Conformance tab (fitness metrics)</td><td>Results → Conformance</td></tr>
+<tr><td>4</td><td>ML model tab (ROC + feature importance)</td><td>Results → Prediction</td></tr>
+</table>
+<p>Screenshots <code>docs/screenshots/</code> folder me save kar lijiye.</p>
+
+<h2>5.4 2-minute demo script (bol-bol ke practice kijiye)</h2>
+<div class="box">
+<p><b>[0:00 – 0:20] Problem</b><br>
+“Hospital me ek patient ko Registration se Discharge tak kai steps se guzarna padta hai.
+Real me har patient ka rasta alag hota hai. Sirf report dekhne se pata nahi chalta ki
+kahan wait ho raha hai aur kahan kharcha badh raha hai.”</p>
+
+<p><b>[0:20 – 0:40] Solution</b><br>
+“Maine CareFlow banaya — ek clinical pathway process mining system. Yeh hospital ke event log
+ko padhta hai — har row matlab ek patient ka ek step — aur usse asli process model, bottlenecks,
+conformance aur prediction nikalta hai.”</p>
+
+<p><b>[0:40 – 1:10] Discovery demo</b><br>
+“Yeh hai hamara discovered process model — Directly-Follows Graph, 28 edges, 15 activities.
+1,500 patients ke 13,583 events se bana hai. 14 different pathway variants mile, lekin top 5
+variants milkar 81 % cases cover karte hain — matlab zyada tar patients standard pathway follow
+karte hain.”</p>
+
+<p><b>[1:10 – 1:40] Insights demo</b><br>
+“Yeh Overview tab. Average stay 9.65 ghante. Sabse bada bottleneck hai <b>Observation</b> —
+average 226 minute wait. Costliest department Operation Theatre hai. Poore 6 mahine ka treatment
+cost 2.58 crore rupaye. Load Friday 2 baje peak par hai — matlab staff roster usi hisaab se
+lagana chahiye.”</p>
+
+<p><b>[1:40 – 2:00] Prediction demo</b><br>
+“Aur yeh predictive part — main ek model train kiya jo admission ke waqt hi bata deta hai ki
+patient ka stay 24 ghante se zyada ho sakta hai ya nahi. 4 real-world drivers mile: kitne
+events hue, rework kitna hua, triage level, aur admission type. Isse hospital pehle se plan
+kar sakta hai.”</p>
+</div>
+
+<h2>5.5 Viva / review me poochhe jaane wale 12 sawaal</h2>
+<table>
+<tr><th>#</th><th>Sawaal</th><th>Aapka jawab (short)</th></tr>
+<tr><td>1</td><td>Process mining kya hai?</td><td>Event logs se asli business process ko discover,
+monitor aur improve karne ki technique. 3 hisse: discovery, conformance, enhancement.</td></tr>
+<tr><td>2</td><td>Event log me minimum kya chahiye?</td><td>Case ID, activity, timestamp —
+“process mining ke teen zaroori columns”.</td></tr>
+<tr><td>3</td><td>DFG aur Petri net me farak?</td><td>DFG sirf “kaun kis ke baad aaya” dikhata hai.
+Petri net me places aur tokens hote hain, isliye conformance properly check ho jaata hai.</td></tr>
+<tr><td>4</td><td>Variant kya hota hai?</td><td>Ek case ka poora activity sequence. Same sequence
+wale cases ek hi variant ke hain.</td></tr>
+<tr><td>5</td><td>Conformance checking kaise kiya?</td><td>Token-based replay — actual trace ko
+discovered model par chalaya, missing aur remaining tokens gine, usse fitness nikala.</td></tr>
+<tr><td>6</td><td>Fitness 100 % kyun aaya?</td><td>Kyunki data synthetic hai aur generator ke
+saare paths model me cover hote hain. Real data par 0.70–0.95 aata hai. <b>(honest answer)</b></td></tr>
+<tr><td>7</td><td>Data leakage kya hai, aapne kaise handle kiya?</td><td>Outcome ke baad bante
+columns (waiting time, service time) model se hata diye — production model leakage-free
+features par bana hai, tabhi results honest hote hain.</td></tr>
+<tr><td>8</td><td>Imbalanced data kaise handle kiya?</td><td>Long-stay cases sirf 1.13 % hain,
+isliye accuracy ki jagah <b>F1, Precision, Recall, ROC-AUC</b> par model select kiya, aur
+stratified 80/20 split + 5-fold cross-validation use kiya.</td></tr>
+<tr><td>9</td><td>Kaunsa model best nikla?</td><td>Leakage-free set par Gradient Boosting —
+accuracy 99.7 %, F1 0.80, ROC-AUC 0.998.</td></tr>
+<tr><td>10</td><td>Business impact kya hai?</td><td>Bottleneck (Observation wait) ka pata chala,
+staff roster peak hour ke hisaab se plan ho sakta hai, aur long-stay patients ko pehle se flag
+karke bed planning ho sakti hai.</td></tr>
+<tr><td>11</td><td>Project ki limitation?</td><td>Reference data synthetic hai; asli hospital
+data ke liye ETL aur data-privacy clearance chahiye. Model retraining bhi regular chahiye.</td></tr>
+<tr><td>12</td><td>Aage kya kar sakte hain?</td><td>Real HIS/EMR integration, live alerting,
+simulation (what-if), aur object-centric process mining multiple patients ke saath.</td></tr>
+</table>
+
+<h2>5.6 Submission pack — kya-kya bhejna hai</h2>
+<table>
+<tr><th>Assignment requirement</th><th>File</th><th>Notes</th></tr>
+<tr><td>Source Code (if applicable)</td><td><code>CareFlow_Project.zip</code></td><td>Poora project + data + outputs + docs</td></tr>
+<tr><td>Project Documentation</td><td><code>CareFlow_Project_Documentation.pdf</code></td><td>Technical documentation</td></tr>
+<tr><td>Project Report</td><td><code>CareFlow_Project_Report.pdf</code></td><td>Complete report with charts</td></tr>
+<tr><td>Presentation (PPT)</td><td><code>CareFlow_Presentation_Content.pdf</code></td><td>13 slides — PowerPoint me copy-paste kijiye</td></tr>
+<tr><td>Model Evaluation Results</td><td><code>CareFlow_Model_Evaluation_Results.pdf</code></td><td>Saare metrics + leakage analysis</td></tr>
+<tr><td>Final Project Demonstration</td><td><code>CareFlow_Step5_Dashboard_And_Demo.pdf</code></td><td>Demo script + live dashboard</td></tr>
+</table>
+
+<h3>Email draft (mentor ko bhejne ke liye)</h3>
+<pre>
+Subject: CareFlow - Clinical Pathway Process Mining - Final Project Submission
+
+Respected Ms. Jyotirmayee Behera,
+
+I am submitting the final deliverables for my internship project
+"CareFlow: Clinical Pathway Process Mining" (Ref. No. ITS/DA/1393,
+Data Analytics domain, Data Associate L1 Intern).
+
+Attached:
+1. Source Code            - CareFlow_Project.zip
+2. Project Documentation  - CareFlow_Project_Documentation.pdf
+3. Project Report         - CareFlow_Project_Report.pdf
+4. Presentation (PPT)     - CareFlow_Presentation_Content.pdf
+5. Model Evaluation       - CareFlow_Model_Evaluation_Results.pdf
+6. Final Demonstration    - careFlow Dashboard (streamlit run dashboard/app.py)
+
+Project summary:
+- 1,500 patient cases, 13,583 events, 15 clinical activities
+- Discovered process model: 28 directly-follows edges, 14 pathway variants
+- Average length of stay 9.65 h; biggest bottleneck Observation (226.6 min wait)
+- Conformance analysis + long-stay prediction model (Gradient Boosting,
+  ROC-AUC 0.998 on leakage-free features)
+- Interactive Streamlit dashboard with 5 analysis tabs
+
+All work is original. Please let me know if any clarification is required
+or if a demonstration session is needed.
+
+Regards,
+Yash Rahangdale
+yashrahangdale112@gmail.com | +91 8177869412
+</pre>
+
+<h2>5.7 Final checklist (submit karne se pehle)</h2>
+<table>
+<tr><th>✔</th><th>Kaam</th></tr>
+<tr><td>☐</td><td><code>python run_all.py</code> clean chala aur “Pipeline finished” dikha</td></tr>
+<tr><td>☐</td><td><code>outputs/figures/</code> me 14 PNG files hain</td></tr>
+<tr><td>☐</td><td><code>outputs/models/best_model.joblib</code> maujood hai</td></tr>
+<tr><td>☐</td><td><code>streamlit run dashboard/app.py</code> khulta hai aur saare 5 tabs kaam karte hain</td></tr>
+<tr><td>☐</td><td>Dashboard ke 4 screenshots le liye</td></tr>
+<tr><td>☐</td><td>Report me report me aapka naam, ref no. aur dates sahi hain</td></tr>
+<tr><td>☐</td><td>PPT me screenshots aur real numbers daal diye</td></tr>
+<tr><td>☐</td><td>Demo script bolke practice kar li (2 minute me)</td></tr>
+<tr><td>☐</td><td>Viva ke 12 sawaal padh liye</td></tr>
+<tr><td>☐</td><td>ZIP bana liya aur sab PDFs attach kar diye</td></tr>
+</table>
+
+<div class="ok">
+<b>Mubarak ho — project complete hai!</b> Poora CareFlow: data se dashboard tak,
+source code se report tak, sab ready.
+<br><br>
+Ab aapka kaam: <b>run kijiye, samajh lijiye, aur confidently present kar dijiye.</b>
+</div>
+
+</body></html>

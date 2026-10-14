@@ -1,0 +1,31 @@
+{
+  "production_model": "gradient_boosting",
+  "feature_set": "leakage_free",
+  "excluded_leaky_columns": [
+    "total_wait",
+    "avg_wait",
+    "max_wait",
+    "total_service",
+    "wait_ratio"
+  ],
+  "target": "y_long_stay",
+  "los_threshold_hours": 24,
+  "numeric_features": [
+    "age",
+    "triage_level",
+    "n_events",
+    "n_unique_activities",
+    "n_rework",
+    "n_night",
+    "rework_rate",
+    "has_surgery",
+    "has_icu"
+  ],
+  "categorical_features": [
+    "gender",
+    "admission_type",
+    "pathway",
+    "first_activity",
+    "last_activity"
+  ]
+}

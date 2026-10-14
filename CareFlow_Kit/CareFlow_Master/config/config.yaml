@@ -1,0 +1,51 @@
+project:
+  name: "CareFlow"
+  subtitle: "Clinical Pathway Process Mining"
+  author: "Yash Rahangdale"
+  organisation: "Infotact Solutions"
+  ref_no: "ITS/DA/1393"
+  domain: "Data Analytics"
+  role: "Data Associate L1 Intern"
+
+paths:
+  raw_events:     "data/raw/event_log.csv"
+  raw_cases:      "data/raw/case_attributes.csv"
+  processed:      "data/processed/event_log_clean.csv"
+  outputs:        "outputs"
+  figures:        "outputs/figures"
+  models:         "outputs/models"
+  reports:        "outputs/reports"
+
+data_generation:
+  n_cases: 1500
+  seed: 42
+  start_date: "2026-03-01"
+  end_date: "2026-08-31"
+  duplicate_event_rate: 0.006
+  missing_resource_rate: 0.015
+
+preprocessing:
+  remove_duplicates: true
+  drop_missing_activity: true
+  min_case_length: 3
+  max_case_length: 200
+
+discovery:
+  miner: "inductive"          # inductive | heuristics | alpha | dfg
+  noise_threshold: 0.20
+  top_variants: 10
+
+conformance:
+  method: "token_replay"      # token_replay | dfg_alignment
+  min_edge_count: 3
+
+ml:
+  target: "los_hours"
+  los_threshold_hours: 24
+  test_size: 0.20
+  random_state: 42
+  models: ["logistic_regression", "random_forest", "gradient_boosting"]
+
+dashboard:
+  port: 8501
+  title: "CareFlow Analytics - Clinical Pathway Process Mining"

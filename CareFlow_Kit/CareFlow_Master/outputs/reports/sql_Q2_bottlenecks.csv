@@ -1,0 +1,16 @@
+activity,occurrences,avg_wait_min,avg_service_min
+Surgery,386,83.0,202.9
+Observation,583,69.4,153.7
+Radiology,680,54.1,44.7
+ICU Transfer,228,54.0,70.5
+Lab Test,1690,46.5,49.7
+Admission,379,29.4,40.6
+Discharge Planning,989,25.9,35.2
+Specialist Consultation,928,23.4,30.5
+Physiotherapy,862,21.6,48.7
+Emergency Assessment,583,21.2,35.4
+Medication Prescribed,1128,16.5,25.0
+Triage,1104,13.4,14.6
+Diagnosis Confirmed,1106,13.0,14.7
+Discharge,1512,12.1,20.0
+Registration,1506,0.0,11.8

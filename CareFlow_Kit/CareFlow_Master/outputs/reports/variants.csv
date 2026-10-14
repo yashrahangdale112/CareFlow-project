@@ -1,0 +1,11 @@
+variant,case_count,share_pct
+Registration -> Triage -> Specialist Consultation -> Lab Test -> Diagnosis Confirmed -> Medication Prescribed -> Discharge,448,29.87
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,298,19.87
+Registration -> Specialist Consultation -> Lab Test -> Medication Prescribed -> Physiotherapy -> Discharge Planning -> Discharge,234,15.6
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> Observation -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,149,9.93
+Registration -> Specialist Consultation -> Lab Test -> Lab Test -> Medication Prescribed -> Physiotherapy -> Discharge Planning -> Discharge,85,5.67
+Registration -> Triage -> Specialist Consultation -> Lab Test -> Lab Test -> Diagnosis Confirmed -> Medication Prescribed -> Discharge,73,4.87
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,66,4.4
+Registration -> Specialist Consultation -> Lab Test -> Medication Prescribed -> Physiotherapy -> Physiotherapy -> Discharge Planning -> Discharge,62,4.13
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> Observation -> Radiology -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,31,2.07
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> ICU Transfer -> Observation -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,23,1.53

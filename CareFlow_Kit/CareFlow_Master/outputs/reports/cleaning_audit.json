@@ -1,0 +1,17 @@
+{
+  "rows_before": 13664,
+  "rows_after": 13583,
+  "cases": 1500,
+  "activities": 15,
+  "duplicates_removed": 81,
+  "steps": [
+    "normalise column names -> ['case_id', 'activity', 'timestamp', 'resource', 'department', 'wait_minutes', 'service_minutes', 'cost_inr']",
+    "timestamp -> datetime, numeric columns cast",
+    "drop rows missing case_id/activity/timestamp: 0",
+    "remove duplicate events: 81",
+    "blank resource -> 'UNKNOWN', blank department -> 'Unassigned'",
+    "clamp negative waits/costs, impute non-positive service time with median",
+    "derive event_index, gap_minutes, is_rework",
+    "drop cases with <3 or >200 events: 0 cases"
+  ]
+}

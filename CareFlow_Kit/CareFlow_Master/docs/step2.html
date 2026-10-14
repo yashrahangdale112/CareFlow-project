@@ -1,0 +1,157 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<h1>STEP 2 — Dependencies Install Karna</h1>
+<p class="small">Time: ~10 minutes · Internet required · Is step ka output: saare Python libraries install</p>
+
+<div class="box">
+<b>Sabse pehle samajh lo:</b> <b>virtual environment (venv)</b> ek alag “dabba” hai jisme sirf is
+project ki libraries install hoti hain. Isse aapke computer ki baaki Python settings kharab nahi
+hoti. <b>Har baar project kholne par is dabbe ko activate karna padta hai.</b>
+</div>
+
+<h2>2.1 Virtual environment banana</h2>
+<p>VS Code ka terminal kholiye (CareFlow folder me) aur ye chala dijiye:</p>
+
+<h3>Windows par</h3>
+<pre>python -m venv .venv</pre>
+
+<h3>Mac / Linux par</h3>
+<pre>python3 -m venv .venv</pre>
+
+<p>Kuch seconds lagenge. Ab left panel me ek naya hidden folder <code>.venv</code> dikhega —
+yeh aapka “dabba” hai. Ise delete mat kijiye.</p>
+
+<h2>2.2 Virtual environment activate karna</h2>
+<h3>Windows — PowerShell</h3>
+<pre>.\.venv\Scripts\Activate.ps1</pre>
+<p class="small">Agar error aaye: <i>“running scripts is disabled on this system”</i>, to pehle ye
+chala dijiye:</p>
+<pre>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</pre>
+
+<h3>Windows — Command Prompt (CMD)</h3>
+<pre>.venv\Scripts\activate.bat</pre>
+
+<h3>Mac / Linux</h3>
+<pre>source .venv/bin/activate</pre>
+
+<h4>Activate hua ya nahi — pehchan</h4>
+<p>Terminal prompt ke aage <code>(.venv)</code> likha dikhne lagega:</p>
+<pre>(.venv) C:\Projects\CareFlow&gt;</pre>
+<div class="ok">
+Yeh <code>(.venv)</code> dikhna zaroori hai. Nah dikhe to aap system Python me install kar rahe ho
+aur baad me “module not found” errors aayenge.
+</div>
+
+<h2>2.3 Core libraries install karna</h2>
+<pre>pip install --upgrade pip
+pip install -r requirements.txt</pre>
+
+<p>Yeh command <code>requirements.txt</code> me likhi libraries install karegi. Isme kya-kya hai:
+</p>
+<table>
+<tr><th>Library</th><th>Kaam kya karti hai</th></tr>
+<tr><td><code>pandas</code></td><td>Data load, clean aur analyse karna (event log ka dil)</td></tr>
+<tr><td><code>numpy</code></td><td>Fast maths calculation</td></tr>
+<tr><td><code>pyyaml</code></td><td><code>config/config.yaml</code> padhna</td></tr>
+<tr><td><code>matplotlib</code> + <code>seaborn</code></td><td>14 static charts (PNG) banana</td></tr>
+<tr><td><code>networkx</code></td><td>Process model / Directly-Follows Graph draw karna</td></tr>
+<tr><td><code>scikit-learn</code></td><td>Long-stay prediction model train karna</td></tr>
+<tr><td><code>plotly</code></td><td>Dashboard ke interactive charts</td></tr>
+<tr><td><code>streamlit</code></td><td>Interactive web dashboard</td></tr>
+<tr><td><code>openpyxl</code></td><td>Excel export support</td></tr>
+<tr><td><code>reportlab</code></td><td>PDF export support</td></tr>
+<tr><td><code>joblib</code></td><td>Trained model ko file me save karna</td></tr>
+</table>
+
+<p>Install hone me 1–3 minute lagte hain. Sab ke last me aisa dikhna chahiye:</p>
+<pre>Successfully installed altair-5.x joblib-1.x matplotlib-3.x networkx-3.x
+pandas-2.x plotly-5.x scikit-learn-1.x seaborn-0.x streamlit-1.x ...</pre>
+
+<h2>2.4 Install check karna</h2>
+<pre>python -c "import pandas, numpy, sklearn, networkx, seaborn, plotly, streamlit, joblib, yaml, matplotlib; print('ALL CORE LIBRARIES OK')"</pre>
+<p>Output aana chahiye:</p>
+<pre>ALL CORE LIBRARIES OK</pre>
+
+<div class="warn">
+Agar koi library missing dikhe, to sirf wahi install kijiye, jaise:<br>
+<code>pip install seaborn</code> &nbsp; ya &nbsp; <code>pip install joblib plotly</code>
+</div>
+
+<h2 class="pagebreak">2.5 OPTIONAL: pm4py install karna (recommended)</h2>
+<p><code>pm4py</code> duniya ki sabse badi open-source <b>process mining library</b> hai. Isse aapko
+official algorithms milte hain: <b>Inductive Miner</b>, <b>Heuristics Miner</b>, <b>Alpha Miner</b>
+aur <b>Petri net</b> export.</p>
+
+<div class="box">
+<b>Zaroori baat:</b> CareFlow <b>pm4py ke bina bhi poora chalta hai</b>. <code>src/discover_models.py</code>
+ke andar ek pure pandas + networkx discovery engine already likha hua hai. pm4py install karenge to
+result me extra Petri-net model bhi banega — report me “official algorithm” likhne ka bonus milta hai.
+</div>
+
+<pre>pip install -r requirements-optional.txt</pre>
+<p>Ya directly:</p>
+<pre>pip install pm4py graphviz</pre>
+
+<h3>Graphviz binaries (petri net image ke liye zaroori)</h3>
+<table>
+<tr><th>OS</th><th>Kya karna hai</th></tr>
+<tr><td>Windows</td><td><code>https://graphviz.org/download/</code> se <b>64-bit EXE installer</b>
+download karke install kijiye.</td></tr>
+<tr><td>Windows (PATH)</td><td>Install ke baad: Start → “Environment Variables” →
+<code>Path</code> → Edit → New → <code>C:\Program Files\Graphviz\bin</code> → OK.
+Terminal band karke dobara kholiye.</td></tr>
+<tr><td>Mac</td><td><code>brew install graphviz</code></td></tr>
+<tr><td>Ubuntu</td><td><code>sudo apt-get install -y graphviz</code></td></tr>
+</table>
+
+<h3>pm4py aur graphviz check karna</h3>
+<pre>python -c "import pm4py; print('pm4py', pm4py.__version__)"
+dot -V</pre>
+<pre>pm4py 2.7.x
+dot - graphviz version 11.0.0</pre>
+
+<div class="warn">
+Agar <code>import pm4py</code> fail ho jaye to <b>koi tension nahi</b> —
+<code>python src/discover_models.py</code> chalega aur log me likhega
+<code>pm4py not installed - using the built-in pandas/networkx engine</code>.
+Project pura complete rahega.
+</div>
+
+<h2>2.6 Streamlit check karna</h2>
+<pre>streamlit hello</pre>
+<p>Browser khulega <code>http://localhost:8501</code> par, ek demo page dikhega.
+Terminal me <code>Ctrl + C</code> daba kar band kijiye. Streamlit sahi hai.</p>
+
+<h2>2.7 Requirements file ki poori list</h2>
+<p><b><code>requirements.txt</code></b> (core — inhi se project chalta hai)</p>
+<pre>pandas&gt;=2.0.0
+numpy&gt;=1.24.0
+pyyaml&gt;=6.0
+matplotlib&gt;=3.7.0
+networkx&gt;=3.1
+scikit-learn&gt;=1.3.0
+plotly&gt;=5.18.0
+streamlit&gt;=1.32.0
+openpyxl&gt;=3.1.0
+reportlab&gt;=4.0.0</pre>
+<p><b><code>requirements-optional.txt</code></b> (optional — official process-mining algorithms)</p>
+<pre>pm4py&gt;=2.7.11
+graphviz&gt;=0.20.1</pre>
+
+<h2>2.8 Troubleshooting — common errors</h2>
+<table>
+<tr><th>Error</th><th>Matlab</th><th>Solution</th></tr>
+<tr><td><code>pip is not recognized</code></td><td>venv activate nahi hai</td><td>Step 2.2 dobara kijiye, <code>(.venv)</code> dikhna chahiye</td></tr>
+<tr><td><code>No module named pandas</code></td><td>galat Python use ho raha hai</td><td><code>python -m pip install -r requirements.txt</code></td></tr>
+<tr><td><code>running scripts is disabled</code></td><td>PowerShell policy</td><td><code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code></td></tr>
+<tr><td>install bahut slow chal raha hai</td><td>network</td><td><code>pip install --timeout 100 -r requirements.txt</code></td></tr>
+<tr><td><code>ImportError: libGL.so.1</code> (Linux)</td><td>system library missing</td><td><code>sudo apt-get install -y libgl1 libglib2.0-0</code></td></tr>
+<tr><td>Graphviz <code>dot</code> not found</td><td>PATH set nahi</td><td>Step 2.5 ka PATH wala part dobara kijiye</td></tr>
+<tr><td>Kuch bhi samajh nahi aa raha</td><td>—</td><td>venv delete karke (folder <code>.venv</code>) Step 2.1 se dobara shuru kijiye</td></tr>
+</table>
+
+<div class="ok">
+<b>Ho gaya!</b> Libraries install hain, venv active hai. Ab Step 3 — data import.
+</div>
+
+</body></html>

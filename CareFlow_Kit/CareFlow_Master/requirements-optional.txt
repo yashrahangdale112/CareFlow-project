@@ -1,0 +1,11 @@
+# CareFlow - optional / heavy dependencies
+# pm4py gives you the official process-mining algorithms (Inductive Miner,
+# Heuristics Miner, Token-Based Replay). The project also ships a pure
+# pandas/networkx fallback so it runs even if pm4py cannot be installed.
+#
+# pm4py needs Graphviz binaries on the machine for picture export.
+#   Windows : https://graphviz.org/download/  -> install, then add
+#             "C:\Program Files\Graphviz\bin" to PATH
+#   Ubuntu  : sudo apt-get install -y graphviz
+pm4py>=2.7.11
+graphviz>=0.20.1

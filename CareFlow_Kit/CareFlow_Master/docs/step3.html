@@ -1,0 +1,170 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<h1>STEP 3 — Data Import Karna</h1>
+<p class="small">Time: ~10 min · Is step ka output: <code>data/raw/event_log.csv</code> taiyaar</p>
+
+<div class="box">
+<b>Aapke project ke liye 2 raaste hain:</b><br>
+<b>Raasta A (easy):</b> project khud ka synthetic hospital data banata hai — <code>run_all.py</code>
+chalaiye, kaam ho gaya.<br>
+<b>Raasta B (asli data):</b> apna CSV daaliye aur <code>python run_all.py --skip-data</code> chalaiye.
+</div>
+
+<h2>3.1 Event log kya hota hai — 30 second me samjho</h2>
+<p>Process mining ka fuel <b>event log</b> hai. Ek hospital event log ka har row ek
+<b>ghatna (event)</b> batata hai: “kis patient ke saath, kya kaam hua, aur kab hua”.</p>
+<pre>
+case_id     activity                  timestamp             resource      department
+CASE-00001  Registration              2026-03-01 09:14:00   REC-01        Front Desk
+CASE-00001  Triage                    2026-03-01 09:31:00   NUR-EM-01     Emergency
+CASE-00001  Specialist Consultation   2026-03-01 10:12:00   DR-OP-02      Outpatient
+CASE-00001  Lab Test                  2026-03-01 11:40:00   LAB-TECH-01   Laboratory
+CASE-00001  Diagnosis Confirmed       2026-03-01 12:25:00   DR-OP-02      Outpatient
+CASE-00002  Registration              2026-03-01 10:02:00   REC-03        Front Desk
+</pre>
+<p>Ek <b>case</b> = ek patient ka poora journey. Upar wala <code>CASE-00001</code> ke saare rows
+milkar ek complete pathway banate hain.</p>
+
+<h2>3.2 Column specification (yeh 3 columns MUST hain)</h2>
+<table>
+<tr><th>Column</th><th>Mandatory?</th><th>Matlab</th><th>Example</th></tr>
+<tr><td><code>case_id</code></td><td><b>YES</b></td><td>Patient journey ki unique id</td><td><code>CASE-00001</code></td></tr>
+<tr><td><code>activity</code></td><td><b>YES</b></td><td>Jo step hua</td><td><code>Lab Test</code></td></tr>
+<tr><td><code>timestamp</code></td><td><b>YES</b></td><td>Kab hua (date + time dono)</td><td><code>2026-03-01 09:14:00</code></td></tr>
+<tr><td><code>resource</code></td><td>Optional</td><td>Doctor / nurse / machine</td><td><code>LAB-TECH-01</code></td></tr>
+<tr><td><code>department</code></td><td>Optional</td><td>Department ka naam</td><td><code>Laboratory</code></td></tr>
+<tr><td><code>wait_minutes</code></td><td>Optional</td><td>Step se pehle kitna wait hua</td><td><code>42.5</code></td></tr>
+<tr><td><code>service_minutes</code></td><td>Optional</td><td>Step me kitna time laga</td><td><code>51.2</code></td></tr>
+<tr><td><code>cost_inr</code></td><td>Optional</td><td>Us step ka kharcha</td><td><code>1536.00</code></td></tr>
+</table>
+
+<div class="warn">
+Optional columns nahi honge to bhi project chalega — lekin cost chart aur resource workload chart
+khali aayenge. Ho sake to <b>kam se kam <code>resource</code> zaroor daaliye</b>, warna report me
+“resource analysis” section kamzor lagega.
+</div>
+
+<h2>3.3 Raasta A — synthetic data (default, sabse aasan)</h2>
+<p>Kuch bhi karne ki zarurat nahi. Jab aap <code>python run_all.py</code> chalayenge, Step 1 apne aap
+1,500 patients ka realistic event log bana dega.</p>
+<pre>python src/generate_data.py</pre>
+<p>Output:</p>
+<pre>13:11:33 | INFO | careflow.generate_data | events=13664  cases=1500  activities=15
+13:11:33 | INFO | careflow.generate_data | saved data/raw/event_log.csv
+</pre>
+<p>Banegi <b>15 clinical activities</b> wali 4 pathways:</p>
+<table>
+<tr><th>Pathway</th><th>Weight</th><th>Activities (sequence)</th></tr>
+<tr><td>P1 Outpatient Standard</td><td>35 %</td><td>Registration → Triage → Specialist Consultation → Lab Test → Diagnosis Confirmed → Medication Prescribed → Discharge</td></tr>
+<tr><td>P2 Emergency Surgical</td><td>25 %</td><td>Registration → Triage → Emergency Assessment → Lab Test → Radiology → Diagnosis → Admission → Surgery → Observation → Physiotherapy → Discharge Planning → Discharge</td></tr>
+<tr><td>P3 Chronic Followup</td><td>25 %</td><td>Registration → Specialist Consultation → Lab Test → Medication → Physiotherapy → Discharge Planning → Discharge</td></tr>
+<tr><td>P4 ICU Escalation</td><td>15 %</td><td>Registration → Triage → Emergency Assessment → Lab Test → ICU Transfer → Observation → Radiology → Diagnosis → Medication → Discharge Planning → Discharge</td></tr>
+</table>
+<p>Data me jaan-boojh kar 2 asli duniya ki galtiyan daali gayi hain, taaki aap cleaning dikha sakein:</p>
+<ul>
+<li><b>0.6 % duplicate events</b> (same patient ka same step do baar record ho gaya)</li>
+<li><b>1.5 % rows me resource missing</b> (kis staff member ne kiya, woh blank)</li>
+<li><b>Rework loops</b> — Lab Test, Radiology, Physiotherapy dobara ho jaate hain (hospital me aam hai)</li>
+</ul>
+
+<h3>Data ko apni marzi se badalna</h3>
+<p><code>config/config.yaml</code> kholiye aur <code>data_generation</code> section edit kijiye:</p>
+<pre>data_generation:
+  n_cases: 1500                 # kitne patients (3000 kar dijiye to bada data)
+  seed: 42                      # isse number badalne par naya data banega
+  start_date: "2026-03-01"      # data ka pehla din
+  end_date: "2026-08-31"        # data ka aakhri din
+  duplicate_event_rate: 0.006   # duplicate galti ka rate
+  missing_resource_rate: 0.015  # blank resource ka rate</pre>
+<pre>python src/generate_data.py --cases 3000 --seed 7</pre>
+
+<h2 class="pagebreak">3.4 Raasta B — apna asli data import karna</h2>
+
+<h3>Qadam 1 — CSV file taiyaar kijiye</h3>
+<p>Excel / Google Sheets me apna data kholiye. Column names bilkul aise rakhiye (chhote letters,
+underscore, space nahi):</p>
+<pre>case_id, activity, timestamp, resource, department, wait_minutes, service_minutes, cost_inr</pre>
+<p class="small">Column ka order matter nahi karta. Extra columns bhi rakh sakte hain — project unhe
+ignore kar dega.</p>
+
+<h3>Qadam 2 — timestamp format theek kijiye</h3>
+<p>Yeh format use kijiye: <b><code>YYYY-MM-DD HH:MM:SS</code></b> &nbsp; jaise
+<code>2026-03-01 09:14:00</code></p>
+<ul>
+<li>Excel me date <code>01/03/2026</code> likhi ho to usse format kijiye</li>
+<li>Sirf date ho to time <code>00:00:00</code> jod dijiye</li>
+<li>Excel me date ek number (jaise <code>46082</code>) dikhe to cell format “Text” karke
+<code>2026-03-01 09:14:00</code> type kijiye</li>
+</ul>
+
+<h3>Qadam 3 — file sahi jagah rakhiye</h3>
+<pre>CareFlow/data/raw/event_log.csv</pre>
+<p class="small">File ka naam <b>bilkul</b> <code>event_log.csv</code> hona chahiye. Windows kabhi-kabhi
+<code>event_log.csv.csv</code> bana deta hai (kyunki “file extensions hide” hoti hain) —
+Explorer me View → “File name extensions” on karke check kar lijiye.</p>
+
+<h3>Qadam 4 — optional: patient ki details wali file</h3>
+<p>Agar aapke paas patient-level attributes hain to unhe yahan rakhiye:
+<code>data/raw/case_attributes.csv</code></p>
+<pre>case_id, patient_id, age, gender, triage_level, admission_type, pathway, los_hours, total_cost_inr
+CASE-00001, PAT-1001, 67, Male, 2, Emergency, P2_Emergency_Surgical, 31.5, 48210.00</pre>
+<p class="small">Yeh file <b>optional</b> hai. Na dein to project khud calculate kar lega.</p>
+
+<h3>Qadam 5 — pipeline chalao (BINA naya data banaye)</h3>
+<pre>python run_all.py --skip-data</pre>
+<p><code>--skip-data</code> ka matlab: “naya data mat banao, jo mere paas hai wahi use karo”.</p>
+
+<h2>3.5 Real duniya ke datasets (agar aap public data use karna chahein)</h2>
+<table>
+<tr><th>Dataset</th><th>Kya hai</th><th>Kahan se</th></tr>
+<tr><td>BPI Challenge 2015</td><td>Asli Dutch municipality log — process mining ki
+sabse jaani-maani dataset</td><td><code>research.tue.nl</code> (4TU.ResearchData) aur
+<code>processmining.org/event-data.html</code></td></tr>
+<tr><td>BPI Challenge 2011–2020</td><td>Alag-alag industry ke asli event logs</td><td>
+<code>icpmconference.org</code> (BPI Challenge pages)</td></tr>
+</table>
+<div class="warn">
+Yeh public logs <b>healthcare ke nahi</b> hain (municipality / finance / manufacturing ke hain).
+CareFlow me daal sakte hain, lekin <code>activity</code> ke naam hospital wale nahi rahenge.
+Agar mentor hospital data maangta hai to synthetic data hi theek hai — aur report me
+“synthetic data generated per assignment confidentiality constraints” likh dijiye.
+</div>
+
+<h2>3.6 Import verification — ye 5 check kijiye</h2>
+<pre>python -c "
+import pandas as pd
+df = pd.read_csv('data/raw/event_log.csv')
+print('rows          :', len(df))
+print('cases         :', df['case_id'].nunique())
+print('activities    :', df['activity'].nunique())
+print('columns       :', list(df.columns))
+print('date range    :', df['timestamp'].min(), '->', df['timestamp'].max())
+print('missing rows  :', df.isna().sum().sum())
+print(df.head(3))
+"</pre>
+<p>Expected output (synthetic data ke saath):</p>
+<pre>rows          : 13664
+cases         : 1500
+activities    : 15
+columns       : ['case_id', 'activity', 'timestamp', 'resource', 'department',
+                 'wait_minutes', 'service_minutes', 'cost_inr']
+date range    : 2026-03-01 07:26:00 -> 2026-08-31 05:46:50
+missing rows  : 203
+</pre>
+
+<h4>Verification checklist</h4>
+<table>
+<tr><th>Check</th><th>Expected</th><th>Fail hone par</th></tr>
+<tr><td><code>case_id</code> column exists</td><td>Haan</td><td>Column rename kijiye</td></tr>
+<tr><td><code>activity</code> column exists</td><td>Haan</td><td>Column rename kijiye</td></tr>
+<tr><td><code>timestamp</code> column exists</td><td>Haan</td><td>Column rename kijiye</td></tr>
+<tr><td>Cases ki count</td><td>&gt; 50</td><td>case_id galat column par hai</td></tr>
+<tr><td>Activities ki count</td><td>&gt; 5</td><td>activity galat column par hai</td></tr>
+<tr><td>Timestamp range</td><td>6 months</td><td>timestamp format theek kijiye</td></tr>
+</table>
+
+<div class="ok">
+<b>Data ready hai!</b> Ab Step 4 — poora pipeline chalana.
+</div>
+
+</body></html>

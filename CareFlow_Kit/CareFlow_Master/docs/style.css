@@ -1,0 +1,30 @@
+@page { size: A4; margin: 18mm 16mm 16mm 16mm;
+  @bottom-center { content: "CareFlow · Clinical Pathway Process Mining · Yash Rahangdale · Infotact Solutions (ITS/DA/1393) · Page " counter(page); font-size: 7.5pt; color: #6B7B8C; } }
+body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10pt; color: #16222E; line-height: 1.5; }
+h1 { font-size: 21pt; color: #123A6B; margin: 0 0 2mm 0; border-bottom: 3px solid #5B8FF9; padding-bottom: 2mm; }
+h2 { font-size: 14pt; color: #123A6B; margin: 8mm 0 2mm 0; border-left: 5px solid #5B8FF9; padding-left: 3mm; }
+h3 { font-size: 11.5pt; color: #1B5E9E; margin: 5mm 0 1.5mm 0; }
+h4 { font-size: 10pt; color: #2C3E50; margin: 4mm 0 1mm 0; }
+p { margin: 1.5mm 0; }
+ul, ol { margin: 1.5mm 0 1.5mm 5mm; padding-left: 4mm; }
+li { margin: 0.8mm 0; }
+code { font-family: "DejaVu Sans Mono", monospace; background: #EEF3F9; color: #0B3D77; padding: 1px 3px; border-radius: 3px; font-size: 8.8pt; }
+pre { font-family: "DejaVu Sans Mono", monospace; background: #F4F7FB; border-left: 4px solid #5B8FF9;
+  padding: 3mm; font-size: 8.6pt; white-space: pre-wrap; word-wrap: break-word; margin: 2mm 0; border-radius: 3px; }
+table { width: 100%; border-collapse: collapse; margin: 2.5mm 0; font-size: 8.8pt; }
+th { background: #123A6B; color: #fff; text-align: left; padding: 2mm; border: 1px solid #123A6B; }
+td { border: 1px solid #C9D6E4; padding: 1.8mm; vertical-align: top; }
+tr:nth-child(even) td { background: #F7FAFD; }
+.box { background: #EAF3FF; border-left: 5px solid #5B8FF9; padding: 3mm; margin: 3mm 0; border-radius: 3px; }
+.warn { background: #FFF4E5; border-left: 5px solid #F6A623; padding: 3mm; margin: 3mm 0; border-radius: 3px; }
+.ok { background: #E9F9F0; border-left: 5px solid #34A853; padding: 3mm; margin: 3mm 0; border-radius: 3px; }
+.cover { text-align: center; padding: 26mm 0 8mm 0; }
+.cover h1 { font-size: 30pt; border: none; color: #0E2C52; }
+.cover .sub { font-size: 13pt; color: #4A6FA5; margin-top: 3mm; }
+.cover .meta { margin-top: 14mm; font-size: 10.5pt; color: #33475C; }
+.cover .badge { display: inline-block; background: #5B8FF9; color: #fff; padding: 2mm 6mm;
+  border-radius: 20px; font-size: 10pt; margin-top: 6mm; }
+img { max-width: 100%; border: 1px solid #D5E1EE; border-radius: 4px; margin: 2mm 0; }
+.kv td:first-child { width: 42%; font-weight: bold; background: #F2F6FB; }
+.small { font-size: 8.2pt; color: #5A6B7C; }
+.pagebreak { page-break-before: always; }

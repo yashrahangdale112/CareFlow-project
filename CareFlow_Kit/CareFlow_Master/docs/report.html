@@ -1,0 +1,434 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="cover">
+  <div class="badge">DELIVERABLE 3</div>
+  <h1>Project Report</h1>
+  <div class="sub">CareFlow — Clinical Pathway Process Mining</div>
+  <div class="meta">
+    <b>Submitted by:</b> Yash Rahangdale<br>
+    <b>Role:</b> Data Associate L1 Intern · Domain: Data Analytics<br>
+    <b>Organisation:</b> Infotact Solutions, Electronic City, Bengaluru, Karnataka — 560100<br>
+    <b>Ref. No.:</b> ITS/DA/1393<br>
+    <b>Project duration:</b> 10/10/2026 – 10/11/2026 (1 month)<br>
+    <b>Report date:</b> 10 October 2026
+  </div>
+</div>
+
+<h2>Abstract</h2>
+<p>Hospital clinical pathways rarely execute exactly as designed. Tests repeat, patients wait,
+discharge slips, and cost quietly accumulates. This project, <b>CareFlow</b>, applies
+<i>process mining</i> to a hospital event log to discover the real patient pathway, quantify its
+performance, measure conformance against the expected pathway, and predict which patient
+journeys will become long stays.</p>
+<p>Using a 6-month event log of <b>1,500 patient cases</b> and <b>13,583 events</b> spanning
+<b>15 clinical activities</b>, the pipeline discovered a process model with <b>28 directly-follows
+edges</b> and <b>14 distinct pathway variants</b>. The top 5 variants together explain
+<b>80.94 %</b> of all cases. Mean length of stay is <b>9.65 hours</b> (median 6.14 h, P90 18.69 h)
+and 17 cases (1.13 %) exceeded the 24-hour long-stay threshold. The dominant bottleneck is
+<b>Observation</b> with an average wait of <b>226.61 minutes</b>; the costliest department is
+<b>Operation Theatre</b>, and total treatment cost across the dataset is <b>INR 25,886,760.54</b>
+(average INR 17,257.84 per case). Peak hospital load occurs on <b>Friday around 14:00</b>.</p>
+<p>A long-stay prediction model was trained on three algorithms and two feature sets. On a
+leakage-free feature set (duration-derived columns removed, because in a real hospital those are
+unknown at admission), <b>Gradient Boosting</b> achieved <b>accuracy 0.997, F1 0.800 and ROC-AUC
+0.998</b>. All results are delivered through an interactive Streamlit dashboard with five analysis
+tabs and four live filters.</p>
+<p class="small"><b>Keywords:</b> process mining, clinical pathway, event log, directly-follows graph,
+token-based replay, conformance checking, length of stay, healthcare analytics.</p>
+
+<h2>1. Introduction</h2>
+<h3>1.1 Background</h3>
+<p>A clinical pathway is the standardised sequence of activities a patient is expected to follow
+from registration to discharge. In practice, pathways are executed with variation: a laboratory
+test is repeated, a patient is escalated to ICU, discharge planning is delayed by a ward round.
+Managers usually see only aggregates — bed occupancy, average stay, monthly cost — which show
+<i>that</i> something is slow but never <i>where inside the process</i>.</p>
+
+<h3>1.2 Problem statement</h3>
+<p>Given a hospital event log in which every row records one activity performed for one patient at
+one point in time, the project must:</p>
+<ol>
+<li>Discover the actual process followed by patients,</li>
+<li>Locate bottlenecks, cost concentrations and resource overload,</li>
+<li>Quantify how far real cases deviate from the expected pathway,</li>
+<li>Predict, from admission-time information, which journeys become long stays,</li>
+<li>Present all of it in a form a non-technical stakeholder can use.</li>
+</ol>
+
+<h3>1.3 Objectives</h3>
+<table>
+<tr><th>#</th><th>Objective</th><th>Success measure</th><th>Result</th></tr>
+<tr><td>O1</td><td>Ingest and validate the event log</td><td>Clean log with documented quality report</td><td>Achieved — 81 duplicates removed, 203 blank resources filled</td></tr>
+<tr><td>O2</td><td>Discover the process model</td><td>DFG + variant ranking</td><td>Achieved — 28 edges, 14 variants</td></tr>
+<tr><td>O3</td><td>Performance analysis</td><td>LOS, bottleneck, cost, resource, load</td><td>Achieved — 7 analyses, 7 charts</td></tr>
+<tr><td>O4</td><td>Conformance checking</td><td>Fitness per case + deviation list</td><td>Achieved — fitness 1.000 on synthetic log</td></tr>
+<tr><td>O5</td><td>Predictive model</td><td>F1 / ROC-AUC on held-out test set</td><td>Achieved — F1 0.800, AUC 0.998 (leakage-free)</td></tr>
+<tr><td>O6</td><td>Interactive dashboard</td><td>Filters change all views live</td><td>Achieved — 5 tabs, 4 filters, 12+ charts</td></tr>
+</table>
+
+<h3>1.4 Scope</h3>
+<p><b>In scope:</b> single-hospital event log analysis; process discovery; performance and
+conformance analysis; long-stay classification; interactive dashboard; documentation.
+<b>Out of scope:</b> live hospital system integration, patient-identifiable data, treatment
+recommendation, and clinical decision-making.</p>
+
+<h3>1.5 Report organisation</h3>
+<p>Section 2 reviews related work. Section 3 describes data and methodology. Section 4 presents
+results with charts. Section 5 discusses implications and limitations. Section 6 concludes and
+lists future work.</p>
+
+<h2>2. Literature review</h2>
+<p>Process mining extracts process knowledge from event logs and comprises three families of
+techniques: <b>discovery</b> (derive a model without prior knowledge), <b>conformance checking</b>
+(compare the model with reality), and <b>enhancement</b> (extend or repair the model).
+PM4Py is the leading open-source Python implementation, supporting the Inductive Miner,
+Heuristics Miner and Alpha Miner along with token-based replay [1][2].</p>
+<p>In healthcare, process mining has been used to summarise clinical pathways from event logs [3],
+to monitor patient pathways at a secondary healthcare organisation [5], and reviewed across the
+field as a whole in tertiary study form [4]. The recurring finding across this literature is that
+pathway <b>variation</b> — not raw volume — is the main driver of avoidable delay and cost, which
+is precisely the variation this project quantifies and then models predictively.</p>
+
+<h2>3. Methodology</h2>
+
+<h3>3.1 Overall pipeline</h3>
+<pre>
+[1] Event-log generation / import      ->  data/raw/event_log.csv
+[2] Cleaning + feature engineering     ->  data/processed/event_log_clean.csv
+[3] Process discovery (DFG, variants)  ->  model + 28 edges + 14 variants
+[4] Performance analytics & insights   ->  7 analyses, 7 charts
+[5] Conformance (token-based replay)   ->  fitness, deviations
+[6] Predictive modelling               ->  best_model.joblib
+[7] Interactive dashboard              ->  Streamlit, 5 tabs
+</pre>
+
+<h3>3.2 Dataset</h3>
+<table class="kv">
+<tr><td>Patient cases</td><td>1,500</td></tr>
+<tr><td>Events before cleaning</td><td>13,664</td></tr>
+<tr><td>Events after cleaning</td><td>13,583</td></tr>
+<tr><td>Clinical activities</td><td>15</td></tr>
+<tr><td>Resources</td><td>28</td></tr>
+<tr><td>Observation window</td><td>01 Mar 2026 → 31 Aug 2026 (6 months)</td></tr>
+<tr><td>Mandatory fields</td><td>case_id, activity, timestamp</td></tr>
+</table>
+<p>The event log is generated by <code>src/generate_data.py</code> from four clinical pathway
+templates with log-normal service and waiting-time distributions, business-hour weighting and
+probability-driven rework loops. This is a deliberate methodological choice: the assignment
+window (1 month) and patient-confidentiality constraints rule out using identifiable hospital
+data, and a generator makes the entire pipeline fully reproducible from a seed. The generator
+also injects two authentic data-quality defects — 0.6 % duplicate events and 1.5 % blank
+resource fields — so that the cleaning stage performs real work.</p>
+
+<h4>Pathway templates</h4>
+<table>
+<tr><th>Pathway</th><th>Weight</th><th>Sequence</th></tr>
+<tr><td>P1 Outpatient Standard</td><td>35 %</td><td>Registration → Triage → Specialist Consultation → Lab Test → Diagnosis Confirmed → Medication Prescribed → Discharge</td></tr>
+<tr><td>P2 Emergency Surgical</td><td>25 %</td><td>Registration → Triage → Emergency Assessment → Lab Test → Radiology → Diagnosis Confirmed → Admission → Surgery → Observation → Physiotherapy → Discharge Planning → Discharge</td></tr>
+<tr><td>P3 Chronic Followup</td><td>25 %</td><td>Registration → Specialist Consultation → Lab Test → Medication Prescribed → Physiotherapy → Discharge Planning → Discharge</td></tr>
+<tr><td>P4 ICU Escalation</td><td>15 %</td><td>Registration → Triage → Emergency Assessment → Lab Test → ICU Transfer → Observation → Radiology → Diagnosis Confirmed → Medication Prescribed → Discharge Planning → Discharge</td></tr>
+</table>
+
+<h3>3.3 Data cleaning</h3>
+<table>
+<tr><th>Step</th><th>Rule</th><th>Rows affected</th></tr>
+<tr><td>Timestamp parsing</td><td>to_datetime with coerce; drop unparseable</td><td>0</td></tr>
+<tr><td>Duplicate removal</td><td>Unique on (case_id, activity, timestamp), keep first</td><td>81</td></tr>
+<tr><td>Missing resource</td><td>Fill with <code>UNASSIGNED</code></td><td>203</td></tr>
+<tr><td>Invalid numerics</td><td>NaN → 0; negatives clipped to 0</td><td>0</td></tr>
+<tr><td>Case length filter</td><td>Keep 3 ≤ events ≤ 200</td><td>0 cases</td></tr>
+<tr><td>Attribute defaults</td><td>gender = Unknown, triage_level = 3, department = Unknown</td><td>0</td></tr>
+</table>
+
+<h3>3.4 Feature engineering</h3>
+<table>
+<tr><th>Feature</th><th>Definition</th><th>Purpose</th></tr>
+<tr><td><code>gap_minutes</code></td><td>timestamp − previous timestamp in the case</td><td>Waiting time</td></tr>
+<tr><td><code>event_index</code></td><td>cumcount within case</td><td>Step position</td></tr>
+<tr><td><code>case_size</code></td><td>Events per case</td><td>Journey complexity</td></tr>
+<tr><td><code>elapsed_hours</code></td><td>timestamp − case start</td><td>Progress</td></tr>
+<tr><td><code>is_rework</code></td><td>Activity already seen in the same case</td><td>Rework detection</td></tr>
+<tr><td><code>variant</code></td><td>Joined activity sequence of the case</td><td>Variant analysis</td></tr>
+<tr><td><code>shift</code></td><td>Hour bins: Night / Morning / Evening / Late Night</td><td>Staffing pattern</td></tr>
+<tr><td><code>is_weekend</code>, <code>weekday</code>, <code>month</code></td><td>Calendar attributes</td><td>Load seasonality</td></tr>
+</table>
+
+<h3>3.5 Process discovery method</h3>
+<p>The Directly-Follows Graph is built by sorting each case by timestamp and pairing consecutive
+activities, then counting each pair across all cases. Node size encodes activity frequency;
+edge labels encode how often the transition occurred. Variants are derived by joining each case's
+activity sequence and counting unique sequences. When pm4py is available, the Inductive Miner
+(noise threshold 0.20), Heuristics Miner and Alpha Miner are additionally executed and the
+resulting Petri net is exported; without pm4py the built-in pandas/networkx engine produces
+identical DFG and variant results.</p>
+
+<h3>3.6 Conformance method — token-based replay</h3>
+<p>The model is the DFG restricted to edges occurring at least <code>min_edge_count</code> times
+(default 3). Each case trace is replayed against it:</p>
+<pre>fitness = 0.5 x (1 − missing / produced) + 0.5 x (1 − remaining / produced)
+
+  produced  = number of transitions actually fired in the trace
+  consumed  = transitions consistent with the model
+  missing   = model-allowed transitions not observed in the trace
+  remaining = model tokens left unconsumed at trace end
+  range     = [0, 1], where 1.0 means perfect conformance</pre>
+
+<h3>3.7 Predictive modelling method</h3>
+<table>
+<tr><th>Design choice</th><th>Setting</th><th>Reason</th></tr>
+<tr><td>Target</td><td>Binary <code>y_long_stay = los_hours &gt; 24</code></td><td>Clinically actionable threshold</td></tr>
+<tr><td>Unit of analysis</td><td>One row per case (1,500 rows)</td><td>Matches the decision to be made</td></tr>
+<tr><td>Feature sets</td><td>Full (19 features) vs leakage-free (14 features)</td><td>Honest vs optimistic comparison</td></tr>
+<tr><td>Excluded leaky features</td><td>total_wait, avg_wait, max_wait, total_service, wait_ratio</td><td>These are only known <i>after</i> the stay</td></tr>
+<tr><td>Algorithms</td><td>Logistic Regression, Random Forest, Gradient Boosting</td><td>Linear baseline + two ensembles</td></tr>
+<tr><td>Split</td><td>Stratified 80/20, random_state = 42</td><td>Preserve the rare positive class</td></tr>
+<tr><td>Preprocessing</td><td>StandardScaler + OneHotEncoder inside the pipeline</td><td>No information crosses the split</td></tr>
+<tr><td>Selection metric</td><td>Highest test F1</td><td>Accuracy is misleading at a 1.13 % positive rate</td></tr>
+<tr><td>Validation</td><td>5-fold cross-validated F1</td><td>Stability check</td></tr>
+</table>
+
+<h2 class="pagebreak">4. Results</h2>
+
+<h3>4.1 Process model — discovered care pathway</h3>
+<p>The discovered model has <b>28 directly-follows edges</b> across <b>15 activities</b>.
+Every case starts with <code>Registration</code> (1,500 / 1,500) and ends with
+<code>Discharge</code> (1,500 / 1,500), confirming a well-formed log with a single entry and a
+single exit point.</p>
+<img src="../outputs/figures/dfg_careflow.png" alt="Directly-Follows Graph">
+<p class="small">Figure 1 — Directly-Follows Graph. Node size is proportional to activity
+frequency; the red labels on each edge show how many times that transition occurred.</p>
+
+<h3>4.2 Pathway variants</h3>
+<p>Cases follow <b>14 distinct sequences</b>. The single most common variant covers
+<b>29.87 %</b> of cases, and the top five variants together cover <b>80.94 %</b> — a classic
+80/20-style concentration that tells management where standardisation effort pays off.</p>
+<img src="../outputs/figures/variants_top10.png" alt="Top 10 variants">
+<p class="small">Figure 2 — Top 10 pathway variants with case counts and share of total.</p>
+
+<h3>4.3 Length of stay and long stays</h3>
+<table class="kv">
+<tr><td>Mean length of stay</td><td>9.65 hours</td></tr>
+<tr><td>Median</td><td>6.14 hours</td></tr>
+<tr><td>90th percentile</td><td>18.69 hours</td></tr>
+<tr><td>Cases above 24 hours</td><td>17 (1.13 %)</td></tr>
+</table>
+<p>The distribution is strongly right-skewed: the mean sits well above the median, which means a
+small number of complex journeys inflate the average. This is why the mean alone is a poor
+planning figure and why the long-stay tail is analysed separately.</p>
+<img src="../outputs/figures/kpi_los_distribution.png" alt="LOS distribution">
+<p class="small">Figure 3 — Length-of-stay distribution with the 24-hour long-stay threshold
+(red dashed) and the median (green dotted).</p>
+
+<h3>4.4 Bottleneck analysis</h3>
+<p>Average waiting time before each activity identifies <b>Observation</b> as the dominant
+bottleneck at <b>226.61 minutes</b> average wait, followed by other ward and theatre-related steps.
+Across the whole dataset patients collectively waited <b>868,869.6 minutes</b> — the single
+largest recoverable capacity pool in the process.</p>
+<img src="../outputs/figures/bottleneck_waiting.png" alt="Bottlenecks">
+<p class="small">Figure 4 — Top 12 process bottlenecks by average waiting time.</p>
+
+<h3>4.5 Cost analysis</h3>
+<table class="kv">
+<tr><td>Total treatment cost</td><td>INR 25,886,760.54</td></tr>
+<tr><td>Costliest department</td><td>Operation Theatre</td></tr>
+<tr><td>Average cost per case</td><td>INR 17,257.84</td></tr>
+</table>
+<img src="../outputs/figures/cost_by_department.png" alt="Cost by department">
+<p class="small">Figure 5 — Total treatment cost by department.</p>
+
+<h3>4.6 Resource workload</h3>
+<p>The busiest resource is <code>REC-01</code> with <b>1,038 events</b> handled — a front-desk
+role. This is expected in a pathway where every single case begins with registration, but it also
+shows where a queue would hurt most patients at once.</p>
+<img src="../outputs/figures/resource_workload.png" alt="Resource workload">
+<p class="small">Figure 6 — Top 15 resources by number of events handled.</p>
+
+<h3>4.7 Temporal load pattern</h3>
+<p>Peak hospital load falls on <b>Friday around 14:00</b>. The heatmap makes the operational
+implication explicit: staffing should be rebalanced towards the late-morning to mid-afternoon
+window on weekdays rather than spread evenly.</p>
+<img src="../outputs/figures/hourly_heatmap.png" alt="Hourly heatmap">
+<p class="small">Figure 7 — Events by weekday and hour of day.</p>
+
+<h3>4.8 Pathway comparison</h3>
+<table>
+<tr><th>Pathway</th><th>Cases</th><th>Avg LOS (h)</th><th>Avg cost (INR)</th></tr>
+<tr><td>P1 Outpatient Standard</td><td>521</td><td>4.52</td><td>5,150.28</td></tr>
+<tr><td>P3 Chronic Followup</td><td>400</td><td>5.77</td><td>7,169.72</td></tr>
+<tr><td>P4 ICU Escalation</td><td>204</td><td>15.15</td><td>22,281.61</td></tr>
+<tr><td>P2 Emergency Surgical</td><td>375</td><td>17.94</td><td>42,107.01</td></tr>
+</table>
+<p>The Emergency Surgical pathway consumes <b>8.2×</b> the cost of the Outpatient pathway and
+<b>4×</b> its length of stay, despite serving fewer patients. Resource planning should therefore
+be pathway-aware, not volume-aware.</p>
+<img src="../outputs/figures/pathway_comparison.png" alt="Pathway comparison">
+<p class="small">Figure 8 — Average length of stay (bars, left axis) versus average cost per case
+(bars, right axis) for each care pathway.</p>
+
+<h3>4.9 Conformance checking</h3>
+<table class="kv">
+<tr><td>Cases checked</td><td>1,500</td></tr>
+<tr><td>Model edges (≥ 3 occurrences)</td><td>28</td></tr>
+<tr><td>Average fitness</td><td>1.0000</td></tr>
+<tr><td>Perfectly fitting cases</td><td>100.0 %</td></tr>
+<tr><td>Cases with deviations</td><td>0</td></tr>
+</table>
+<div class="warn">
+<b>Interpretation (important).</b> A fitness of exactly 1.0 is a property of the synthetic
+dataset, not a claim about real hospitals: the log is generated from a finite set of pathway
+templates, so every transition it contains is by construction present in the discovered model,
+and the model can therefore replay its own data perfectly. On a real hospital log — where
+clinicians skip, reorder and repeat steps in ways no template anticipates — average fitness
+typically falls in the <b>0.70–0.95</b> range and the deviation list becomes the most valuable
+output of the analysis. The method implemented here is the same one that would be applied to
+that real log; only the data is synthetic.
+</div>
+<img src="../outputs/figures/conformance_fitness.png" alt="Conformance fitness">
+<p class="small">Figure 9 — Conformance fitness distribution across the 1,500 cases.</p>
+<img src="../outputs/figures/deviation_types.png" alt="Deviation types">
+<p class="small">Figure 10 — Most frequent deviations from the expected pathway (empty on the
+synthetic log; populated on real data).</p>
+
+<h3>4.10 Predictive model results</h3>
+<table>
+<tr><th>Feature set</th><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th><th>CV F1 (5-fold)</th></tr>
+<tr><td rowspan="3">Full (19)</td><td>Logistic Regression</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>0.727 ± 0.167</td></tr>
+<tr><td>Random Forest</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td>Gradient Boosting</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000</td><td>1.000 ± 0.000</td></tr>
+<tr><td rowspan="3"><b>Leakage-free (14)</b></td><td>Logistic Regression</td><td>0.993</td><td>1.000</td><td>0.333</td><td>0.500</td><td>0.987</td><td>0.080 ± 0.160</td></tr>
+<tr><td>Random Forest</td><td>0.990</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.996</td><td>0.000 ± 0.000</td></tr>
+<tr><td><b>Gradient Boosting ★</b></td><td><b>0.997</b></td><td><b>1.000</b></td><td><b>0.667</b></td><td><b>0.800</b></td><td><b>0.998</b></td><td>0.180 ± 0.223</td></tr>
+</table>
+<p>★ Production model. Test set = 300 cases (297 normal, 3 long-stay).
+Confusion matrix <code>[[297, 0], [1, 2]]</code>: zero false alarms, two of three long stays
+caught, one missed.</p>
+<div class="box">
+<b>Why the gap between the two feature sets matters.</b> The full set scores a perfect 1.000
+because it contains <code>total_wait</code>, <code>total_service</code> and similar columns that
+are computed from the very timestamps that define length of stay — the model is effectively being
+told the answer. Real hospitals make a long-stay decision at admission, when none of those
+durations exist yet. Removing them, Gradient Boosting still reaches <b>ROC-AUC 0.998</b> with
+<b>zero false positives</b>, which is the number that can honestly be quoted.
+</div>
+<img src="../outputs/figures/model_roc.png" alt="ROC curves">
+<p class="small">Figure 11 — ROC curves for all six model/feature-set combinations.</p>
+<img src="../outputs/figures/model_confusion_matrix.png" alt="Confusion matrix">
+<p class="small">Figure 12 — Confusion matrix of the production model on the held-out test set.</p>
+<img src="../outputs/figures/feature_importance.png" alt="Feature importance">
+<p class="small">Figure 13 — Top 15 drivers of a long hospital stay (production model).</p>
+
+<h3>4.11 Case volume trend</h3>
+<table>
+<tr><th>Month</th><th>Mar 2026</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th></tr>
+<tr><td>Cases</td><td>261</td><td>243</td><td>267</td><td>252</td><td>265</td><td>231</td></tr>
+</table>
+<img src="../outputs/figures/case_volume_trend.png" alt="Monthly volume">
+<p class="small">Figure 14 — Monthly patient case volume across the six-month window.</p>
+
+<h2>5. Discussion</h2>
+<h3>5.1 Interpretation of findings</h3>
+<p>Three findings carry direct operational value. First, <b>variation is concentrated</b>: five
+variants explain 81 % of journeys, so standardising just those five removes most of the
+dispersion. Second, the bottleneck is <b>waiting, not treating</b> — Observation's 226.6-minute
+average wait dwarfs its own service time, and the dataset-wide waiting pool of 868,869.6 minutes
+is capacity that is currently lost rather than used. Third, <b>cost tracks pathway, not
+volume</b>: Emergency Surgical patients are fewer than Outpatient patients yet cost 8.2× more each.</p>
+
+<h3>5.2 Recommendations</h3>
+<ol>
+<li><b>Decongest Observation.</b> Add a second ward-round slot in the peak window and a dedicated
+discharge desk so discharge planning does not queue behind routine rounds.</li>
+<li><b>Fast-track laboratory sampling</b> in the morning peak, the second-largest wait category.</li>
+<li><b>Roster to the load curve.</b> Shift staff towards Friday 14:00 and the late-morning
+to mid-afternoon band on weekdays.</li>
+<li><b>Flag long-stay risk early.</b> Deploy the leakage-free model at admission; with zero false
+positives it can trigger bed planning without crying wolf.</li>
+<li><b>Standardise the top five variants</b> as the official pathway, then re-run conformance to
+track drift over time.</li>
+</ol>
+
+<h3>5.3 Limitations</h3>
+<ul>
+<li>The reference log is <b>synthetic</b>. Conformance fitness of 1.0 is a property of that
+generator, not a hospital finding; on real logs expect 0.70–0.95.</li>
+<li>The positive class is small (17 of 1,500; 3 in the test set). F1 and CV F1 therefore carry
+wide uncertainty — a single test case moves recall by 33 percentage points.</li>
+<li>DFG-based token replay is less precise than Petri-net alignment; pm4py alignment would
+tighten conformance measurement.</li>
+<li>No patient-identifiable or clinical outcome data was used, so the analysis is
+operational, not clinical.</li>
+<li>The model is a single time-snapshot; real deployment would require periodic retraining and
+drift monitoring.</li>
+</ul>
+
+<h2>6. Conclusion and future work</h2>
+<p>CareFlow demonstrates a complete, reproducible healthcare process-mining workflow: from a raw
+event log through cleaning, feature engineering, process discovery, performance analytics,
+conformance checking and predictive modelling, to an interactive dashboard. On the reference log
+it identified 14 pathway variants (top 5 covering 80.94 % of cases), isolated Observation as the
+dominant bottleneck at 226.61 minutes average wait, quantified INR 25,886,760.54 of treatment cost
+concentrated in Operation Theatre, and produced a leakage-free long-stay classifier with ROC-AUC
+0.998 and zero false positives.</p>
+<p><b>Future work:</b> integrate a real HIS/EMR source (HL7/FHIR export) to replace the synthetic
+log; add live alerting when a bottleneck spikes; build a what-if simulator that estimates the
+effect of extra staff on length of stay; extend to object-centric process mining across multiple
+patient encounters; and add drift monitoring with scheduled retraining.</p>
+
+<h2>References</h2>
+<ol>
+<li>PM4Py — open-source process mining for Python. <code>https://processintelligence.solutions/pm4py</code> ·
+<code>https://github.com/process-intelligence-solutions/pm4py</code></li>
+<li>Berti, A., van Zelst, S. J., van der Aalst, W. M. P. — “Process Mining for Python (PM4Py):
+Bridging the Gap Between Process- and Data Science.” CEUR-WS Vol. 2374.
+<code>https://ceur-ws.org/Vol-2374/paper4.pdf</code></li>
+<li>Huang, Z., Lu, X., Duan, H. — “Summarizing clinical pathways from event logs.”
+Journal of Biomedical Informatics, 2013.
+<code>https://www.sciencedirect.com/science/article/pii/S1532046412001554</code></li>
+<li>Santos, A. et al. — “Process mining in healthcare: a tertiary study.”
+<code>https://pmc.ncbi.nlm.nih.gov/articles/PMC12355893/</code></li>
+<li>Özdağoğlu, G. et al. — “Monitoring patient pathways at a secondary healthcare
+organisation.” BMC Medical Informatics and Decision Making, 2025.
+<code>https://link.springer.com/article/10.1186/s12911-025-03016-5</code></li>
+<li>BPI Challenge event logs, 4TU.ResearchData — <code>https://research.tue.nl</code> ·
+<code>https://www.processmining.org/event-data.html</code></li>
+<li>scikit-learn documentation — <code>https://scikit-learn.org/stable/</code> (for reference only;
+URL confirmed via project dependency set)</li>
+<li>Streamlit documentation. <code>https://docs.streamlit.io/get-started/installation</code></li>
+</ol>
+
+<h2>Appendix A — Project artefacts</h2>
+<table>
+<tr><th>Artefact</th><th>Path</th></tr>
+<tr><td>Event log (raw)</td><td><code>data/raw/event_log.csv</code> (13,664 rows)</td></tr>
+<tr><td>Event log (clean)</td><td><code>data/processed/event_log_clean.csv</code> (13,583 rows)</td></tr>
+<tr><td>Process model figures</td><td><code>outputs/figures/dfg_careflow.png</code>, <code>variants_top10.png</code></td></tr>
+<tr><td>Analytics figures</td><td><code>outputs/figures/</code> (14 PNG files in total)</td></tr>
+<tr><td>Metrics</td><td><code>outputs/reports/*.json</code>, <code>*.csv</code></td></tr>
+<tr><td>Trained model</td><td><code>outputs/models/best_model.joblib</code></td></tr>
+<tr><td>Source code</td><td><code>src/</code> (6 modules), <code>dashboard/app.py</code>, <code>run_all.py</code></td></tr>
+</table>
+
+<h2>Appendix B — How to reproduce</h2>
+<pre>python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python run_all.py                  # ~17 seconds
+streamlit run dashboard/app.py     # http://localhost:8501</pre>
+<p>All randomness is pinned to <code>seed = 42</code> (numpy <code>default_rng</code>,
+sklearn <code>random_state</code>), so repeated runs reproduce identical data, models and metrics.</p>
+
+<h2>Appendix C — Submission mapping</h2>
+<table>
+<tr><th>Assignment requirement</th><th>Delivered as</th></tr>
+<tr><td>Source Code</td><td><code>CareFlow_Project.zip</code> (complete project)</td></tr>
+<tr><td>Project Documentation</td><td><code>CareFlow_Project_Documentation.pdf</code></td></tr>
+<tr><td>Project Report</td><td>This report</td></tr>
+<tr><td>Presentation (PPT)</td><td><code>CareFlow_Presentation_Content.pdf</code> (13 slides)</td></tr>
+<tr><td>Model Evaluation Results</td><td><code>CareFlow_Model_Evaluation_Results.pdf</code></td></tr>
+<tr><td>Final Project Demonstration</td><td><code>CareFlow_Step5_Dashboard_And_Demo.pdf</code> + live dashboard</td></tr>
+</table>
+
+<p class="small">End of report — Yash Rahangdale, Data Associate L1 Intern, Ref. No. ITS/DA/1393,
+Infotact Solutions, 10 October 2026.</p>
+
+</body></html>

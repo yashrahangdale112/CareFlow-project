@@ -1,0 +1,194 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="cover">
+  <div class="badge">INFOTACT SOLUTIONS · INTERNSHIP PROJECT</div>
+  <h1>CareFlow</h1>
+  <div class="sub">Clinical Pathway Process Mining — Complete Build Guide</div>
+  <div class="meta">
+    <b>Intern:</b> Yash Rahangdale &nbsp;|&nbsp; <b>Ref. No.:</b> ITS/DA/1393<br>
+    <b>Role:</b> Data Associate L1 Intern &nbsp;|&nbsp; <b>Domain:</b> Data Analytics<br>
+    <b>Project window:</b> 10/10/2026 → 10/11/2026 (1 month)<br>
+    <b>Reference date:</b> 10 October 2026
+  </div>
+</div>
+
+<h2>CareFlow kya hai? (1 minute me samjho)</h2>
+<p>Hospital me patient ka safar kai steps se guzarta hai — <b>Registration → Triage → Lab Test →
+Diagnosis → Treatment → Discharge</b>. Har patient ka yeh rasta thoda different hota hai: kuch
+patients ka test dobara hota hai, kuch ko ICU jana padta hai, kuch bahut zyada wait karte hain.</p>
+<p><b>CareFlow</b> ek hospital ke <b>event log</b> ko padhta hai (1 row = 1 patient ka 1 step) aur
+<b>process mining</b> lagakar ye nikalta hai:</p>
+<ol>
+<li><b>Discovery</b> — asli pathway ka process model (Directly-Follows Graph) banata hai</li>
+<li><b>Analytics</b> — bottleneck, waiting time, cost aur resource load nikalti hai</li>
+<li><b>Conformance</b> — real cases expected pathway se kitne hatt gaye, woh check karti hai</li>
+<li><b>Prediction</b> — kaunsa patient long stay (&gt; 24 hours) hoga, woh predict karti hai</li>
+<li><b>Dashboard</b> — sab kuch interactive Streamlit dashboard me dikhati hai</li>
+</ol>
+
+<div class="box">
+<b>Aapka assignment letter kehta hai:</b> submit karna hai <b>Source Code · Project Documentation ·
+Project Report · Presentation (PPT) · Model Evaluation Results · Final Demonstration</b>.
+Yeh guide wahi 6 cheezein aapke liye bana deti hai — sab ready hai, bas run karke apne naam se
+submit kar dijiye.
+</div>
+
+<h2>Yeh guide kaise use karein</h2>
+<table>
+<tr><th>#</th><th>PDF file</th><th>Kya sikhaata hai</th><th>Time</th></tr>
+<tr><td>Step 1</td><td><code>CareFlow_Step1_Setup</code></td><td>Python + VS Code + folder setup</td><td>10 min</td></tr>
+<tr><td>Step 2</td><td><code>CareFlow_Step2_Install_Dependencies</code></td><td>pip install, venv, pm4py, Graphviz</td><td>10 min</td></tr>
+<tr><td>Step 3</td><td><code>CareFlow_Step3_Import_Your_Data</code></td><td>Apna data kaise import karein</td><td>10 min</td></tr>
+<tr><td>Step 4</td><td><code>CareFlow_Step4_Run_Pipeline</code></td><td>Poora pipeline step-by-step chalana</td><td>5 min</td></tr>
+<tr><td>Step 5</td><td><code>CareFlow_Step5_Dashboard_And_Demo</code></td><td>Dashboard + demonstration</td><td>10 min</td></tr>
+<tr><td>Extra</td><td><code>CareFlow_Project_Documentation</code></td><td>Deliverable 2</td><td>—</td></tr>
+<tr><td>Extra</td><td><code>CareFlow_Project_Report</code></td><td>Deliverable 3</td><td>—</td></tr>
+<tr><td>Extra</td><td><code>CareFlow_Model_Evaluation_Results</code></td><td>Deliverable 5</td><td>—</td></tr>
+<tr><td>Extra</td><td><code>CareFlow_Presentation_Content</code></td><td>Deliverable 4 (PPT)</td><td>—</td></tr>
+</table>
+
+<h2>0. Sabse pehle: zip file kholna</h2>
+<ol>
+<li>Download ki hui <code>CareFlow_Project.zip</code> ko apne computer par <b>right-click → Extract All</b>
+(Windows) ya double-click (Mac) se kholiye.</li>
+<li>Ek folder banega <code>CareFlow</code> — uske andar <code>src</code>, <code>data</code>,
+<code>dashboard</code>, <code>outputs</code>, <code>docs</code> sab honge.</li>
+<li>Is folder ko aisi jagah rakhiye jahan path me space na ho, jaise
+<code>C:\Projects\CareFlow</code> ya <code>~/Projects/CareFlow</code>.</li>
+</ol>
+
+<div class="warn">
+<b>Important:</b> Zip ko <code>Downloads</code> me hi mat chhodiye aur Desktop par
+space wale naam se mat rakhiye. Simple path use kijiye — baad me errors kam aayenge.
+</div>
+
+<h2>1. Poora flow ek nazar me</h2>
+<pre>
+  ZIP kholo
+     |
+     v
+[Step 1] Python + VS Code install  ->  CareFlow folder VS Code me open
+     |
+     v
+[Step 2] python -m venv .venv  ->  pip install -r requirements.txt
+     |
+     v
+[Step 3] data/raw/event_log.csv me apna data daalo (ya synthetic data use karo)
+     |
+     v
+[Step 4] python run_all.py       <- 6 steps apne aap chal jaate hain
+     |
+     v
+[Step 5] streamlit run dashboard/app.py   ->  browser me dashboard
+     |
+     v
+  Submit: Source Code + Documentation + Report + PPT + Model Evaluation + Demo
+</pre>
+
+<h2>2. Kya-kya chahiye (requirements)</h2>
+<table>
+<tr><th>Cheez</th><th>Minimum</th><th>Recommended</th><th>Kahan se</th></tr>
+<tr><td>Computer</td><td>4 GB RAM</td><td>8 GB RAM</td><td>—</td></tr>
+<tr><td>Disk space</td><td>1.5 GB free</td><td>3 GB free</td><td>—</td></tr>
+<tr><td>Python</td><td>3.10</td><td>3.12 / 3.13</td><td><code>python.org/downloads</code></td></tr>
+<tr><td>Editor</td><td>VS Code</td><td>VS Code + Python extension</td><td><code>code.visualstudio.com</code></td></tr>
+<tr><td>Internet</td><td>pip install ke liye</td><td>—</td><td>—</td></tr>
+</table>
+
+<div class="ok">
+<b>Gyaan:</b> Sirf core pipeline ke liye koi paid software nahi chahiye — sab open-source hai.
+Optional <code>pm4py</code> bhi free hai.
+</div>
+
+<h2>3. Project folder ka structure (yaad rakhiye)</h2>
+<pre>
+CareFlow/
+|-- config/config.yaml            <- saari settings yahan (cases, threshold, paths)
+|-- data/
+|   |-- raw/                      <- apna ya synthetic data
+|   `-- processed/                <- cleaning ke baad ka clean data
+|-- src/
+|   |-- utils.py                  <- config loader + logger
+|   |-- generate_data.py          <- STEP 1 event log banata hai
+|   |-- preprocess.py             <- STEP 2 cleaning + features
+|   |-- discover_models.py        <- STEP 3 process discovery
+|   |-- analyze_insights.py       <- STEP 4 KPI + bottleneck + insights
+|   |-- conformance.py            <- STEP 5 fitness checking
+|   `-- ml_model.py               <- STEP 6 long-stay prediction
+|-- dashboard/app.py              <- STEP 7 Streamlit dashboard
+|-- outputs/
+|   |-- figures/                  <- 14 charts (PNG)
+|   |-- reports/                  <- JSON + CSV results
+|   `-- models/                   <- trained model file
+|-- docs/                         <- yeh saare guide PDFs
+|-- run_all.py                    <- one-click runner
+|-- requirements.txt
+`-- README.md
+</pre>
+
+<h2>4. Reference run ke results (aapko yahi milenge)</h2>
+<table class="kv">
+<tr><td>Patient cases</td><td>1,500</td></tr>
+<tr><td>Events (cleaning ke baad)</td><td>13,583</td></tr>
+<tr><td>Activities</td><td>15</td></tr>
+<tr><td>Directly-follows edges</td><td>28</td></tr>
+<tr><td>Pathway variants</td><td>14 (top variant = 29.87 %)</td></tr>
+<tr><td>Average length of stay</td><td>9.65 hours (median 6.14 h)</td></tr>
+<tr><td>Long-stay cases (&gt; 24 h)</td><td>17 (1.13 %)</td></tr>
+<tr><td>Biggest bottleneck</td><td>Observation — 226.6 min average wait</td></tr>
+<tr><td>Costliest department</td><td>Operation Theatre</td></tr>
+<tr><td>Average cost per case</td><td>INR 17,258</td></tr>
+<tr><td>Peak hospital load</td><td>Friday, 14:00</td></tr>
+<tr><td>Pipeline runtime</td><td>~17 seconds</td></tr>
+</table>
+
+<div class="warn">
+<b>Honest note (viva me zaroor bataiye):</b> reference run <b>synthetic</b> data par hua hai —
+<code>src/generate_data.py</code> realistic hospital event log generate karta hai, taaki aap
+patient-confidential data ke bina poora pipeline demonstrate kar sakein. Isi wajah se synthetic
+data par conformance fitness <b>1.0</b> aata hai. <b>Asli hospital log</b> par fitness generally
+<b>0.70 – 0.95</b> ke range me aata hai. Asli data daalne ke liye Step 3 dekhiye.
+</div>
+
+<h2>5. Delieverable checklist</h2>
+<table>
+<tr><th>Assignment deliverable</th><th>Aapke paas kya hai</th><th>Status</th></tr>
+<tr><td>Source Code</td><td><code>src/</code> + <code>dashboard/</code> + <code>run_all.py</code> + <code>config/</code></td><td>Ready</td></tr>
+<tr><td>Project Documentation</td><td><code>CareFlow_Project_Documentation.pdf</code></td><td>Ready</td></tr>
+<tr><td>Project Report</td><td><code>CareFlow_Project_Report.pdf</code></td><td>Ready</td></tr>
+<tr><td>Presentation (PPT)</td><td><code>CareFlow_Presentation_Content.pdf</code> (13 slides, copy-paste ready)</td><td>Ready</td></tr>
+<tr><td>Model Evaluation Results</td><td><code>CareFlow_Model_Evaluation_Results.pdf</code></td><td>Ready</td></tr>
+<tr><td>Final Project Demonstration</td><td><code>CareFlow_Step5_Dashboard_And_Demo.pdf</code></td><td>Ready</td></tr>
+</table>
+
+<h2>6. Mentor ko progress update bhejne ka format</h2>
+<pre>
+Subject: CareFlow - Project Progress Update (Week 1 of 4)
+
+Respected Mentor,
+
+I have completed the following on the CareFlow (Clinical Pathway
+Process Mining) project:
+
+1. Environment setup and dependency installation - done
+2. Event log ingestion, cleaning and validation - done
+   (13,664 raw rows -> 13,583 clean events, 81 duplicates removed)
+3. Process discovery - DFG with 28 edges and 14 pathway variants
+4. Analytics - LOS 9.65 h average, bottleneck = Observation (226.6 min)
+5. Conformance checking and long-stay prediction model - completed
+6. Interactive dashboard (Streamlit) - ready for demonstration
+
+Artefacts: source code, project report, documentation and model
+evaluation results attached.
+
+Requesting a review call at your convenience.
+
+Regards,
+Yash Rahangdale
+Data Associate L1 Intern | Ref. No. ITS/DA/1393
+</pre>
+
+<p class="small">Ab Step 1 PDF kholiye aur setup shuru kijiye. Har step me exact commands diye hain —
+copy-paste kar dijiye, kuch yaad rakhne ki zarurat nahi.</p>
+
+</body></html>

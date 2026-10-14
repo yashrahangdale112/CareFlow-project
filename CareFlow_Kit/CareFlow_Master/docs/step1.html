@@ -1,0 +1,113 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+
+<h1>STEP 1 — Setup (Python + VS Code + Folder)</h1>
+<p class="small">Time: ~10 minutes · Skill needed: none · Kuch bhi pehle se install nahi hona chahiye</p>
+
+<div class="box">
+<b>Is step ka goal:</b> aapke computer par Python chalne lage, VS Code khul jaye, aur CareFlow
+folder VS Code me open ho jaye. Bas.
+</div>
+
+<h2>1.1 Python install karna</h2>
+
+<h3>A. Windows par</h3>
+<ol>
+<li>Browser kholiye aur jaaiye: <code>https://www.python.org/downloads/</code></li>
+<li>Page par bada yellow button dikhega — <b>“Download Python 3.x.x”</b> (jo latest stable version
+hai, 3.12 ya 3.13). Us par click kijiye. <code>.exe</code> file download hogi
+(jaise <code>python-3.13.x-amd64.exe</code>).</li>
+<li>Downloaded file par double-click kijiye.</li>
+<li><b style="color:#C0392B">SABSE ZAROORI:</b> installer ke pehle page par neeche do checkbox honge.
+<b>“Add python.exe to PATH”</b> wale ko <b>zaroor tick kijiye</b>. Yeh bhool gaye to baad me
+<code>python</code> command nahi chalega.</li>
+<li><b>Install Now</b> par click kijiye aur finish hone tak wait kijiye.</li>
+</ol>
+
+<h3>B. Mac par</h3>
+<ol>
+<li>Jaaiye <code>https://www.python.org/downloads/</code> se <code>.pkg</code> installer download kijiye, ya</li>
+<li>Terminal kholiye (Command + Space → “Terminal” → Enter) aur likhiye:
+<pre>brew install python@3.12</pre>
+(Agar Homebrew nahi hai to pehle <code>https://brew.sh</code> se install kar lijiye.)</li>
+</ol>
+
+<h3>C. Linux (Ubuntu) par</h3>
+<pre>sudo apt update
+sudo apt install -y python3 python3-pip python3-venv</pre>
+
+<h3>D. Python install hua ya nahi — ye check kijiye</h3>
+<p>Terminal / Command Prompt kholiye aur ye 2 commands chala dijiye:</p>
+<pre>python --version
+pip --version</pre>
+<p>Aisi output aani chahiye:</p>
+<pre>Python 3.12.7
+pip 24.2 from /usr/lib/python3/dist-packages/pip (python 3.12)</pre>
+<div class="warn">
+Agar <code>python</code> kaam na kare to Windows par <code>py --version</code> try kijiye.
+Agar <code>'python' is not recognized</code> aaye to Python dobara install kijiye aur
+“Add to PATH” wala checkbox tick kijiye.
+</div>
+
+<h2>1.2 VS Code install karna</h2>
+<ol>
+<li>Jaaiye <code>https://code.visualstudio.com/</code></li>
+<li>Bada blue <b>Download</b> button — apna OS khud detect ho jaata hai. Click kijiye.</li>
+<li>Installer chalaiye, Next → Next → Install.</li>
+<li>VS Code kholiye, left side me <b>Extensions</b> icon (chaar chhote boxes) par click kijiye.</li>
+<li>Search kijiye <b>Python</b> (Microsoft wala, blue icon) → <b>Install</b>.</li>
+<li>Usi tarah search karke install kijiye: <b>Pylance</b>, <b>Jupyter</b> (optional), <b>Rainbow CSV</b>
+(CSV file rangeen dikhegi — bahut helpful).</li>
+</ol>
+
+<h2>1.3 Project folder ready karna</h2>
+<ol>
+<li><code>CareFlow_Project.zip</code> file ko extract kijiye (right-click → Extract All).</li>
+<li>Ek <code>CareFlow</code> folder milega. Use is jagah move kar dijiye:
+<ul>
+<li>Windows: <code>C:\Projects\CareFlow</code></li>
+<li>Mac/Linux: <code>~/Projects/CareFlow</code></li>
+</ul></li>
+</ol>
+
+<div class="warn">
+Path me <b>space</b>, <b>Hindi characters</b> ya bahut lamba naam mat rakhiye.
+<code>C:\Users\Yash\Desktop\New folder (2)\CareFlow</code> — aise path se problems aati hain.
+</div>
+
+<h2>1.4 Folder VS Code me kholna</h2>
+<ol>
+<li>VS Code kholiye.</li>
+<li>Menu: <b>File → Open Folder…</b> (Mac par <b>File → Open…</b>)</li>
+<li><code>CareFlow</code> folder select kijiye → Open.</li>
+<li>Left side Explorer me <code>src</code>, <code>data</code>, <code>dashboard</code>,
+<code>outputs</code>, <code>docs</code>, <code>run_all.py</code> dikhne chahiye.</li>
+</ol>
+
+<h2>1.5 VS Code ka terminal kholna</h2>
+<ol>
+<li>Menu: <b>Terminal → New Terminal</b> (shortcut: <code>Ctrl + `</code>)</li>
+<li>Neeche ek panel khulega. Uski prompt line kuch aisi hogi:</li>
+</ol>
+<pre>C:\Projects\CareFlow&gt;</pre>
+<p>Yaani aap <b>sahi folder ke andar</b> hain. Isi terminal me aage saare commands chalenge.</p>
+
+<div class="ok">
+<b>Terminal me folder badalna</b> agar prompt galat folder dikhaye:<br>
+<code>cd C:\Projects\CareFlow</code> &nbsp;(Windows)<br>
+<code>cd ~/Projects/CareFlow</code> &nbsp;(Mac / Linux)
+</div>
+
+<h2>1.6 Step 1 verification checklist</h2>
+<table>
+<tr><th>Check</th><th>Command</th><th>Expected</th></tr>
+<tr><td>Python installed</td><td><code>python --version</code></td><td>Python 3.10+</td></tr>
+<tr><td>pip working</td><td><code>pip --version</code></td><td>pip 23+</td></tr>
+<tr><td>Right folder</td><td><code>dir</code> (Windows) / <code>ls</code> (Mac)</td><td><code>run_all.py</code> aur <code>src</code> dikhe</td></tr>
+<tr><td>VS Code open</td><td>Explorer panel</td><td>CareFlow files dikh rahi hain</td></tr>
+</table>
+
+<div class="box">
+<b>Sab check pass ho gaya?</b> Aur nahi? Step 2 kholiye — ab dependencies install karenge.
+</div>
+
+</body></html>

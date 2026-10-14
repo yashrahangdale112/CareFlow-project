@@ -1,0 +1,130 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>CareFlow Setup Guide</title>
+<style>
+@page { size:A4; margin:14mm; }
+body{font-family:"DejaVu Sans",Arial,sans-serif;font-size:10.5pt;color:#12212e;line-height:1.45;margin:0}
+h1{font-size:21pt;color:#0b5d7a;border-bottom:3px solid #0b5d7a;padding-bottom:6px;margin:0 0 4px}
+h2{font-size:13.5pt;color:#0b5d7a;margin:16px 0 5px;border-left:5px solid #17a2b8;padding-left:8px}
+p{margin:5px 0}
+code,pre{font-family:"DejaVu Sans Mono",monospace;font-size:8.7pt}
+pre{background:#f3f7f9;border:1px solid #cfe0e6;border-left:4px solid #0b5d7a;padding:8px;white-space:pre-wrap;border-radius:4px;margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:7px 0;font-size:9pt}
+th{background:#0b5d7a;color:#fff;text-align:left;padding:5px 6px}
+td{border:1px solid #cfe0e6;padding:4px 6px;vertical-align:top}
+tr:nth-child(even) td{background:#f7fbfc}
+ul{margin:5px 0 5px 18px;padding:0}li{margin:3px 0}
+.small{color:#5a6b78;font-size:8.7pt}
+</style></head><body>
+<h1>CareFlow: Clinical Pathway Process Mining — Complete Setup Guide</h1>
+<p class="small">Intern: <b>Yash Rahangdale</b> · Data Associate L1 Intern · Infotact Solutions · Ref. No. <b>ITS/DA/1393</b> · 10 Oct 2026 → 10 Nov 2026</p>
+<h2>0. Kit me kya-kya hai</h2>
+<ul>
+<li><code>data/raw/</code> — <code>event_log.csv</code> (13,664 rows) aur <code>case_attributes.csv</code> (1,500 cases)</li>
+<li><code>data/processed/</code> — <code>event_log_clean.csv</code> (13,583 rows, 26 columns)</li>
+<li><code>src/</code> — generate_data, clean_data, preprocess, discover_models, analyze_insights, conformance, ml_model, connect_db, pm4py_discovery, utils</li>
+<li><code>sql/</code> — <code>schema.sql</code>, <code>load_data.sql</code>, <code>kpi_queries.sql</code>, <code>views.sql</code></li>
+<li><code>notebooks/</code> — 6 notebooks (00 database → 05 ML)</li>
+<li><code>dashboard/app.py</code> — Streamlit dashboard</li>
+<li><code>outputs/</code> — 14 charts (PNG), JSON/CSV reports, trained model (joblib)</li>
+<li><code>docs/</code> — yeh guide · <code>reports/</code> — project report · <code>presentation/</code> — PPTX</li>
+</ul>
+<h2>1. Start kaise kare (sahi order)</h2>
+<p>Pehle project laptop par chalao, phir GitHub par daalo. 6 command me pura setup:</p>
+<pre>python -m venv .venv
+.venv\Scripts\activate          # Windows
+source .venv/bin/activate       # Mac/Linux
+pip install -r requirements.txt
+python run_all.py               # 6 stages, ~25 seconds
+streamlit run dashboard/app.py  # http://localhost:8501</pre>
+<p><code>run_all.py</code> 6 stages chalata hai: generate data → clean + features → process discovery → insights/charts → conformance → ML model.</p>
+<h2>2. GitHub par upload — kaun si file pehle</h2>
+<p><b>Rule:</b> pehle <b>SKELETON</b> (README + config), phir <b>CODE</b>, phir <b>OUTPUT</b>, phir <b>DOCS</b>. Isse har commit ka matlab samajh aata hai aur mentor ko week-wise progress dikhti hai.</p>
+<table>
+<tr><th>Order</th><th>Files</th><th>Kyun / Kab</th></tr>
+<tr><td>1</td><td>README.md, .gitignore, requirements.txt, requirements-optional.txt, config/config.yaml</td><td>Repo ka chehra — sabse pehla commit</td></tr>
+<tr><td>2</td><td>data/raw/*.csv, src/generate_data.py, src/utils.py, src/clean_data.py, sql/schema.sql, sql/load_data.sql</td><td>Week 1 — data ready karna</td></tr>
+<tr><td>3</td><td>src/preprocess.py, src/discover_models.py, src/conformance.py, sql/kpi_queries.sql, sql/views.sql, notebooks/</td><td>Week 2 — process mining + SQL</td></tr>
+<tr><td>4</td><td>src/analyze_insights.py, src/ml_model.py, src/connect_db.py, dashboard/, outputs/, run_all.py</td><td>Week 3 — insights, charts, dashboard, model</td></tr>
+<tr><td>5</td><td>docs/, reports/, presentation/, README.md (final)</td><td>Week 4 — report, PPT, documentation</td></tr>
+</table>
+<h2>3. Git commands — step by step</h2>
+<pre>cd CareFlow
+git init -b main
+git config user.name  "Yash Rahangdale"
+git config user.email "yashrahangdale112@gmail.com"
+
+git add README.md .gitignore requirements.txt requirements-optional.txt config/
+git commit -m "Week 1: project skeleton, README and config"
+
+git add data/raw src/generate_data.py src/utils.py src/clean_data.py sql/schema.sql sql/load_data.sql
+git commit -m "Week 1: raw clinical event log, generator, cleaning script and SQL schema"
+
+git add src/preprocess.py src/discover_models.py src/conformance.py sql/kpi_queries.sql sql/views.sql notebooks/
+git commit -m "Week 2: preprocessing, process discovery, conformance and SQL KPI queries"
+
+git add src/analyze_insights.py src/ml_model.py src/connect_db.py dashboard/ outputs/ run_all.py
+git commit -m "Week 3: KPI insights, charts, Streamlit dashboard and long-stay model"
+
+git add docs/ reports/ presentation/ README.md
+git commit -m "Week 4: documentation, project report and presentation"
+
+git remote add origin https://github.com/&lt;your-username&gt;/CareFlow-Clinical-Pathway-Process-Mining.git
+git branch -M main
+git push -u origin main</pre>
+<p>Baad me sirf: <code>git add . ; git commit -m "message" ; git push</code></p>
+<h2>4. GitHub web upload (git ke bina)</h2>
+<ul>
+<li>github.com → <b>New repository</b> → naam <code>CareFlow-Clinical-Pathway-Process-Mining</code> → Public → Create</li>
+<li><b>Add file → Upload files</b> → files drag-drop → <b>Commit changes</b></li>
+<li>Folder-wise upload karo (src, sql, docs alag-alag) taaki path sahi bane</li>
+<li>README upload hote hi repo home page par dikh jata hai</li>
+</ul>
+<h2>5. Database connect (MySQL / PostgreSQL)</h2>
+<p>Star schema: <code>dim_patient, dim_activity, dim_department, dim_resource, dim_date</code> + <code>fact_case, fact_event</code>. Files isi order me chalao: schema → load_data → kpi_queries → views.</p>
+<pre># MySQL
+mysql -u root -p &lt; sql/schema.sql
+mysql -u root -p --local-infile=1 careflow &lt; sql/load_data.sql
+mysql -u root -p careflow &lt; sql/kpi_queries.sql
+
+# Python (SQLAlchemy) — ek hi code, teen DB
+python src/connect_db.py --engine sqlite
+python src/connect_db.py --engine mysql
+python src/connect_db.py --engine postgres
+export CAREFLOW_DB_URL="mysql+pymysql://user:pass@localhost:3306/careflow"</pre>
+<p>Zaroori: MySQL me <code>TIMESTAMP</code> reserved word hai isliye column <code>event_timestamp</code> rakha gaya. <code>event_index</code> ko <code>ROW_NUMBER() OVER (PARTITION BY case_id ORDER BY event_timestamp)</code> se banao — yehi case ke andar event ka order hai, jo process mining ke liye must hai.</p>
+<h2>6. Data cleaning — 8 steps</h2>
+<table>
+<tr><th>#</th><th>Step</th><th>Result (is run me)</th></tr>
+<tr><td>1</td><td>Column names trim + lower</td><td>8 clean columns</td></tr>
+<tr><td>2</td><td>timestamp → datetime, numbers → numeric</td><td>type errors khatam</td></tr>
+<tr><td>3</td><td>case_id / activity / timestamp blank rows drop</td><td>0 rows (log saaf tha)</td></tr>
+<tr><td>4</td><td>Duplicate events hataye (same case + activity + timestamp)</td><td><b>81 duplicates removed</b></td></tr>
+<tr><td>5</td><td>Blank resource → UNKNOWN, department → Unassigned</td><td>event delete nahi kiya, sirf label</td></tr>
+<tr><td>6</td><td>Negative wait/cost → 0, service_minutes median se impute</td><td>outliers handle</td></tr>
+<tr><td>7</td><td>event_index, gap_minutes, is_rework banao</td><td>process mining ready</td></tr>
+<tr><td>8</td><td>3 se chhote / 200 se bade case drop</td><td>0 cases</td></tr>
+</table>
+<p>Final: <b>13,664 → 13,583 events</b>, 1,500 cases, 15 activities. Audit file: <code>outputs/reports/cleaning_audit.json</code></p>
+<h2>7. Dashboard — Streamlit (primary) + Power BI</h2>
+<pre>streamlit run dashboard/app.py</pre>
+<ul>
+<li>Streamlit tabs: Overview KPI, Process (DFG + variants), Bottlenecks, Resources, Conformance, ML prediction</li>
+<li>Power BI: MySQL se <b>Get Data</b> → <code>v_powerbi_export</code> view import karo (ya <code>outputs/reports/*.csv</code>)</li>
+<li>Power BI pages: KPI cards, bottleneck bar chart, weekday × hour heatmap, cost by department, LOS histogram</li>
+<li>Screenshots <code>docs/screenshots/</code> me rakho — report me lagengi</li>
+</ul>
+<h2>8. Real hospital log use karna ho to</h2>
+<p>Public real log: <b>4TU.ResearchData — "Sepsis Cases - Event Log"</b> (Mannhardt; ~1,050 cases / 15,214 events / 16 activities). Column mapping: <code>case:concept:name → case_id</code>, <code>concept:name → activity</code>, <code>time:timestamp → timestamp</code>, <code>org:resource → resource</code>.</p>
+<pre>python src/clean_data.py
+python run_all.py --skip-data</pre>
+<p>Synthetic log par fitness 1.0 aata hai (generator fixed templates follow karta hai). Real log par 0.7–0.95 aur long-stay AUC ≈ 0.75–0.90 expect karo.</p>
+<h2>9. Common error aur fix</h2>
+<ul>
+<li><code>No module named pm4py</code> → optional hai, fallback engine chalta rehta hai; real miners ke liye <code>pip install -r requirements-optional.txt</code> + Graphviz binaries</li>
+<li>MySQL "Access denied" → <code>LOAD DATA LOCAL INFILE</code> ke liye <code>--local-infile=1</code></li>
+<li>Streamlit blank page → project root se chalao, paths relative hain</li>
+<li>Timestamp text ban jaye → <code>pd.read_csv(..., parse_dates=['timestamp'])</code></li>
+<li>Inductive miner image error → <code>sudo apt-get install -y graphviz</code> (Windows: PATH me add karo)</li>
+</ul>
+<p class="small">Infotact Solutions confidential — prepared by Yash Rahangdale.</p>
+</body></html>
