@@ -1,0 +1,11 @@
+department,events,total_cost_inr
+Operation Theatre,386,9381243.0
+Ward,1951,4903160.0
+Laboratory,1690,2526299.0
+Outpatient,2034,1783783.0
+Radiology,680,1675840.0
+Emergency,1687,1649701.0
+ICU,228,1528075.0
+Rehabilitation,862,1254142.0
+Front Desk,3018,721690.0
+Pharmacy,1128,565041.0
