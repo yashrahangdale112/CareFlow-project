@@ -1,0 +1,11 @@
+source_activity,next_activity,edge_count
+Registration,Triage,1100
+Discharge Planning,Discharge,979
+Specialist Consultation,Lab Test,921
+Physiotherapy,Discharge Planning,775
+Diagnosis Confirmed,Medication Prescribed,725
+Emergency Assessment,Lab Test,579
+Radiology,Diagnosis Confirmed,579
+Triage,Emergency Assessment,579
+Lab Test,Diagnosis Confirmed,521
+Medication Prescribed,Discharge,521
