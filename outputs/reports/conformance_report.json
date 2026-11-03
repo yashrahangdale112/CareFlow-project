@@ -1,0 +1,63 @@
+{
+  "model": "DFG (directly-follows graph)",
+  "min_edge_count": 3,
+  "cases_checked": 1500,
+  "model_edges": 28,
+  "average_fitness": 1.0,
+  "perfectly_fitting_cases_pct": 100.0,
+  "fully_conforming_cases_pct": 100.0,
+  "cases_with_deviations": 0,
+  "worst_cases": [
+    {
+      "case_id": "CASE-00001",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00002",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00003",
+      "fitness": 1.0,
+      "trace_length": 13
+    },
+    {
+      "case_id": "CASE-00004",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00005",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00006",
+      "fitness": 1.0,
+      "trace_length": 11
+    },
+    {
+      "case_id": "CASE-00007",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00008",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00009",
+      "fitness": 1.0,
+      "trace_length": 7
+    },
+    {
+      "case_id": "CASE-00010",
+      "fitness": 1.0,
+      "trace_length": 8
+    }
+  ],
+  "top_deviations": []
+}
