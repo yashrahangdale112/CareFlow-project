@@ -1,0 +1,21 @@
+feature,importance
+age,0.43853
+n_night,0.19649
+n_events,0.12317
+triage_level,0.05985
+has_surgery,0.0407
+rework_rate,0.03155
+pathway_P2_Emergency_Surgical,0.02933
+gender_Male,0.02384
+n_unique_activities,0.02155
+pathway_P4_ICU_Escalation,0.01833
+gender_Female,0.0145
+n_rework,0.00167
+has_icu,0.00024
+admission_type_Emergency,0.00024
+admission_type_Day Care,0.0
+admission_type_Outpatient,0.0
+pathway_P1_Outpatient_Standard,0.0
+pathway_P3_Chronic_Followup,0.0
+first_activity_Registration,0.0
+last_activity_Discharge,0.0
