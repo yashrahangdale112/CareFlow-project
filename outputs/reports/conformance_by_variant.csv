@@ -1,0 +1,15 @@
+variant,cases,avg_fitness,conforming_cases
+Registration -> Triage -> Specialist Consultation -> Lab Test -> Diagnosis Confirmed -> Medication Prescribed -> Discharge,448,1.0,448
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,298,1.0,298
+Registration -> Specialist Consultation -> Lab Test -> Medication Prescribed -> Physiotherapy -> Discharge Planning -> Discharge,234,1.0,234
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> Observation -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,149,1.0,149
+Registration -> Specialist Consultation -> Lab Test -> Lab Test -> Medication Prescribed -> Physiotherapy -> Discharge Planning -> Discharge,85,1.0,85
+Registration -> Triage -> Specialist Consultation -> Lab Test -> Lab Test -> Diagnosis Confirmed -> Medication Prescribed -> Discharge,73,1.0,73
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,66,1.0,66
+Registration -> Specialist Consultation -> Lab Test -> Medication Prescribed -> Physiotherapy -> Physiotherapy -> Discharge Planning -> Discharge,62,1.0,62
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> Observation -> Radiology -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,31,1.0,31
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> ICU Transfer -> Observation -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,23,1.0,23
+Registration -> Specialist Consultation -> Lab Test -> Lab Test -> Medication Prescribed -> Physiotherapy -> Physiotherapy -> Discharge Planning -> Discharge,19,1.0,19
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,10,1.0,10
+Registration -> Triage -> Emergency Assessment -> Lab Test -> ICU Transfer -> ICU Transfer -> Observation -> Radiology -> Radiology -> Diagnosis Confirmed -> Medication Prescribed -> Discharge Planning -> Discharge,1,1.0,1
+Registration -> Triage -> Emergency Assessment -> Lab Test -> Radiology -> Radiology -> Diagnosis Confirmed -> Admission -> Surgery -> Surgery -> Observation -> Physiotherapy -> Discharge Planning -> Discharge,1,1.0,1
