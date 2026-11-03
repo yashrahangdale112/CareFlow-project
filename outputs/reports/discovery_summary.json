@@ -1,0 +1,23 @@
+{
+  "cases": 1500,
+  "events": 13583,
+  "activities": 15,
+  "dfg_edges": 28,
+  "unique_variants": 14,
+  "top_variant_share_pct": 29.87,
+  "top_5_variant_share_pct": 80.94000000000001,
+  "start_activities": [
+    [
+      "Registration",
+      1500
+    ]
+  ],
+  "end_activities": [
+    [
+      "Discharge",
+      1500
+    ]
+  ],
+  "pm4py_available": false,
+  "miner": "inductive"
+}
