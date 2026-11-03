@@ -1,0 +1,29 @@
+source,target,count
+Registration,Triage,1100
+Discharge Planning,Discharge,979
+Specialist Consultation,Lab Test,921
+Physiotherapy,Discharge Planning,775
+Diagnosis Confirmed,Medication Prescribed,725
+Radiology,Diagnosis Confirmed,579
+Emergency Assessment,Lab Test,579
+Triage,Emergency Assessment,579
+Triage,Specialist Consultation,521
+Medication Prescribed,Discharge,521
+Lab Test,Diagnosis Confirmed,521
+Lab Test,Medication Prescribed,400
+Registration,Specialist Consultation,400
+Medication Prescribed,Physiotherapy,400
+Observation,Physiotherapy,375
+Surgery,Observation,375
+Lab Test,Radiology,375
+Admission,Surgery,375
+Diagnosis Confirmed,Admission,375
+Lab Test,ICU Transfer,204
+Observation,Radiology,204
+Medication Prescribed,Discharge Planning,204
+ICU Transfer,Observation,204
+Lab Test,Lab Test,177
+Radiology,Radiology,99
+Physiotherapy,Physiotherapy,81
+ICU Transfer,ICU Transfer,24
+Surgery,Surgery,11
